@@ -31,45 +31,106 @@ A focused flashcard app with study scheduling, progress tracking, a cram mode fo
 
 **Required Features**
 
-1. [fill in your required user features here]
-2. ...
-3. ...
+1. User can create a "New Deck" by entering a name, selecting a color, choosing an icon, and toggling private/public visibility.
+2. User can add a new card to a deck by entering "Front" and "Back" text, with options to "Save" or "Add Another card".
+3. User can tap a card to flip it over and reveal the back text.
+4. User can grade their knowledge of a card after flipping it by selecting "Still learning" or "Got it".
+5. User can view a "Study History" screen featuring a monthly calendar grid.
+6. User can view a welcome/onboarding screen to get started with the app.
+
 
 **Optional Features**
 
-1. [fill in your optional user features here]
-2. ...
-3. ...
+1. User can quickly resume their most recent deck from the "Continue Studying" widget on the home screen.
+2. User can see the total card count for each deck directly on the home dashboard.
+3. User can see individual color-coded indicators next to each card to quickly gauge mastery.
+4. User can start a specialized "Cram" session instead of a standard study session.
 
-### 2. Screen Archetypes
+## 2. Screen Archetypes
 
-- [list first screen here]
-  - [list associated required story here]
-  - ...
-- [list second screen here]
-  - [list associated required story here]
-  - ...
+### Welcome / Onboarding Screen
+- User can view a welcome/onboarding screen to get started with the app.
 
-### 3. Navigation
+### Dashboard
+- User can view a home dashboard displaying a grid of decks.
+- User can see the total card count for each deck directly on the home dashboard. *(Optional)*
+- User can quickly resume their most recent deck from the "Continue Studying" widget. *(Optional)*
 
-**Tab Navigation** (Tab to Screen)
+### New Deck Screen
+- User can create a "New Deck" by:
+  - Entering a name
+  - Selecting a color
+  - Choosing an icon
+  - Toggling private/public visibility
 
-* [fill out your first tab]
-* [fill out your second tab]
-* [fill out your third tab]
+### Deck Detail Screen
+- User can view a deck's cards.
+- User can see individual color-coded indicators next to each card to gauge mastery. *(Optional)*
+- User can choose to start studying or begin a "Cram" session. *(Cram = Optional)*
 
-**Flow Navigation** (Screen to Screen)
+### Add Card Screen
+- User can add a new card by:
+  - Entering "Front" text
+  - Entering "Back" text
+- Options:
+  - Save
+  - Add another card
 
-- [list first screen here]
-  - [list screen navigation here]
-  - ...
-- [list second screen here]
-  - [list screen navigation here]
-  - ...
+### Flash Card Section
+- User can tap a card to flip and reveal the back.
+- User can grade their knowledge:
+  - "Still learning"
+  - "Got it"
+
+### Calendar Screen
+- User can view a Study History screen featuring:
+  - Monthly calendar grid
+ 
+## 3. Navigation
+
+### Tab Navigation (Tab to Screen)
+
+- Dashboard
+- Calendar
+- New Deck
+
+### Flow Navigation (Screen to Screen)
+
+- Welcome / Onboarding Screen
+  - => Dashboard
+
+- Dashboard
+  - => Deck Detail Screen (when user taps a deck)
+  - => New Deck Screen (when user taps create button)
+  - => Flash Card Section (via "Continue Studying") *(Optional)*
+
+- New Deck Screen
+  - => Dashboard (after creating a deck)
+
+- Deck Detail Screen
+  - => Add Card Screen (when user adds a card)
+  - => Flash Card Section (when user starts studying)
+  - => Flash Card Section (Cram mode) *(Optional)*
+
+- Add Card Screen
+  - => Deck Detail Screen (after saving)
+  - => Add Card Screen (if user selects "Add another card")
+
+- Flash Card Section
+  - => Deck Detail Screen (after finishing studying)
+  - => Dashboard (optional exit)
+
+- Calendar Screen
+  - => None, but user can tap a date to view detailed study session *(Optional)*
 
 ## Wireframes
 
-[Add picture of your hand sketched wireframes in this section] <img src="YOUR_WIREFRAME_IMAGE_URL" width=600>
+ 
+
+<img width="770" height="686" alt="image" src="https://github.com/user-attachments/assets/e12279d5-e3b1-4713-82c9-83009e800974" />
+
+<img width="432" height="239" alt="image" src="https://github.com/user-attachments/assets/f77185b6-106b-4f2a-9f93-92911b5d49da" />
+
 
 <br>
 
