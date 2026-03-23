@@ -14,17 +14,16 @@ A focused flashcard app with study scheduling, progress tracking, a cram mode fo
 
 ### App Evaluation
 
-[Evaluation of your app across the following attributes]
 - **Category:** Education
 - **Mobile:** Being mobile oriented is important since it provides convenience for studying on the go by matching the format of traditional flashcards.
 - **Story:** Studying in a way that fits you is already difficult. Current systems like Quizlet and Anki are at times too complicated and too simple. This app aims to bridge the gap by providing a convenient and flexible platform to build decks, maintain study habits with a calendar, and shift into cram mode when time is limited.
 - **Market:** High school and college students, self-learners
 - **Habit:**  Users open the app daily to maintain a study streak. Users may also set certain intervals of study throughout a week.
 - **Scope:**
-- V1: Create and manage decks, basic flashcard study flow with flip animation, and a calendar heatmap showing days studied.
-- V2: Progress tracking per deck. This will display how many cards are in "learning", "review", and "mastered" states. Cram mode that shuffles the full deck on repeat.
-- V3: Import and export system for flashcards for sharing decks between users and collaborative deck building.
-- V4: Streak rewards and study milestones, such as badges for hitting daily streaks, completing a full deck, or hitting a mastery threshold
+    - V1: Create and manage decks, basic flashcard study flow with flip animation, and a calendar heatmap showing days studied.
+    - V2: Progress tracking per deck. This will display how many cards are in "learning", "review", and "mastered" states. Cram mode that shuffles the full deck on repeat.
+    - V3: Import and export system for flashcards for sharing decks between users and collaborative deck building.
+    - V4: Streak rewards and study milestones, such as badges for hitting daily streaks, completing a full deck, or hitting a mastery threshold
 
 ## Product Spec
 
