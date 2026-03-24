@@ -125,11 +125,10 @@ A focused flashcard app with study scheduling, progress tracking, a cram mode fo
 
 ## Wireframes
 
- 
+ <img width="875" height="468" alt="image" src="https://github.com/user-attachments/assets/05814f96-2e6d-4fb5-9383-7d14cedfcd80" />
 
-<img width="770" height="686" alt="image" src="https://github.com/user-attachments/assets/e12279d5-e3b1-4713-82c9-83009e800974" />
 
-<img width="432" height="239" alt="image" src="https://github.com/user-attachments/assets/f77185b6-106b-4f2a-9f93-92911b5d49da" />
+
 
 
 <br>
