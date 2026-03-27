@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Flashcard Study</string>
+    <string name="tab_home">Home</string>
+    <string name="tab_new_deck">New Deck</string>
+    <string name="tab_add_card">Add Card</string>
+    <string name="tab_study">Study</string>
 </resources>
