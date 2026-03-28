@@ -26,4 +26,10 @@
         android:title="@string/tab_study"
         app:showAsAction="ifRoom" />
 
+    <item
+        android:id="@+id/calendarTab"
+        android:enabled="true"
+        android:title="@string/tab_calendar"
+        app:showAsAction="ifRoom" />
+
 </menu>
