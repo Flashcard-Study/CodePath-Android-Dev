@@ -31,20 +31,31 @@ A focused flashcard app with study scheduling, progress tracking, a cram mode fo
 
 **Required Features**
 
-1. User can create a "New Deck" by entering a name, selecting a color, choosing an icon, and toggling private/public visibility.
-2. User can add a new card to a deck by entering "Front" and "Back" text, with options to "Save" or "Add Another card".
-3. User can tap a card to flip it over and reveal the back text.
-4. User can grade their knowledge of a card after flipping it by selecting "Still learning" or "Got it".
-5. User can view a "Study History" screen featuring a monthly calendar grid.
-6. User can view a welcome/onboarding screen to get started with the app.
+1. [ ] User can create a "New Deck" by entering a name, selecting a color, choosing an icon, and toggling private/public visibility.
+2. [ ] User can add a new card to a deck by entering "Front" and "Back" text, with options to "Save" or "Add Another card".
+3. [ ] User can tap a card to flip it over and reveal the back text.
+4. [ ]  User can grade their knowledge of a card after flipping it by selecting "Still learning" or "Got it".
+5. [ ] User can view a "Study History" screen featuring a monthly calendar grid.
+6. [ ] User can view a welcome/onboarding screen to get started with the app.
+7. [ ] User can view a Welcome screen with a "Get Started" button.
+8. [ ] User can navigate from the Welcome screen to the Dashboard.
+9. [ ] User can view a Dashboard screen with a visual layout of decks.
+10. [x] User can see 2–3 mock deck cards displayed on the Dashboard.
+12. [x] User can see a "Create Deck" button .
+13. [x] User can navigate to the "Add Card" screen.
+14. [x] User can view input fields for "Front" and "Back" text.
+15. [x] User can view a flashcard study screen UI.
+16. [x] User can see a card with placeholder text.
+18. [x] User can view a Calendar screen with a monthly grid layout.
+20. [x] User can use bottom tab navigation to switch between main screens.
 
 
 **Optional Features**
 
-1. User can quickly resume their most recent deck from the "Continue Studying" widget on the home screen.
-2. User can see the total card count for each deck directly on the home dashboard.
-3. User can see individual color-coded indicators next to each card to quickly gauge mastery.
-4. User can start a specialized "Cram" session instead of a standard study session.
+1. [ ] User can quickly resume their most recent deck from the "Continue Studying" widget on the home screen.
+2. [ ] User can see the total card count for each deck directly on the home dashboard.
+3. [ ] User can see individual color-coded indicators next to each card to quickly gauge mastery.
+4. [ ] User can start a specialized "Cram" session instead of a standard study session.
 
 ## 2. Screen Archetypes
 
@@ -133,15 +144,6 @@ A focused flashcard app with study scheduling, progress tracking, a cram mode fo
 
 <br>
 
-<br>
-
-### [BONUS] Digital Wireframes & Mockups
-
-### [BONUS] Interactive Prototype
-
-<br>
-
-
 
 
 
@@ -154,19 +156,21 @@ A focused flashcard app with study scheduling, progress tracking, a cram mode fo
 
 ## GitHub Project board
 
-[Add screenshot of your Project Board with three milestones visible in
-this section]
-<img src="YOUR_WIREFRAME_IMAGE_URL" width=600>
+<img width="539" height="893" alt="ProjectBoard" src="https://github.com/user-attachments/assets/8cfc1c09-632d-487b-a4ea-36c354cfc835" />
+
 
 ## Issue cards
+Issues Completed this Sprint
+<img width="398" height="788" alt="IssuesCompleted" src="https://github.com/user-attachments/assets/94f83c7b-33f1-4f45-b146-d09f02cb9e7a" />
 
-- [Add screenshot of your Project Board with the issues that you've been working on for this unit's milestone] <img src="YOUR_WIREFRAME_IMAGE_URL" width=600>
-- [Add screenshot of your Project Board with the issues that you're working on in the **NEXT sprint**. It should include issues for next unit with assigned owners.] <img src="YOUR_WIREFRAME_IMAGE_URL" width=600>
+Issues to Complete next Sprint
+<img width="1085" height="606" alt="CompletedIssues" src="https://github.com/user-attachments/assets/d158ae1a-0888-446a-971e-ca08fd4db4cd" />
 
 ## Issues worked on this sprint
 
-- List the issues you completed this sprint
-- [Add giphy that shows current build progress for Milestone 2. Note: We will be looking for progression of work between Milestone 2 and 3. Make sure your giphys are not duplicated and clearly show the change from Sprint 1 to 2.]
+- The issues completed were "Add Card" Static UI, App Navigation & Empty Dashboard, Onboarding & Calendar Shell, Core Study UI Shell, "New Deck" Static UI.
+<img src='unit_8_progress.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
+
 
 <br>
 

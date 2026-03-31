@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/homeTab"
+        android:enabled="true"
+        android:title="@string/tab_home"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/newDeckTab"
+        android:enabled="true"
+        android:title="@string/tab_new_deck"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/addCardTab"
+        android:enabled="true"
+        android:title="@string/tab_add_card"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/studyTab"
+        android:enabled="true"
+        android:title="@string/tab_study"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/calendarTab"
+        android:enabled="true"
+        android:title="@string/tab_calendar"
+        app:showAsAction="ifRoom" />
+
+</menu>
