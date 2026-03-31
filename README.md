@@ -133,15 +133,6 @@ A focused flashcard app with study scheduling, progress tracking, a cram mode fo
 
 <br>
 
-<br>
-
-### [BONUS] Digital Wireframes & Mockups
-
-### [BONUS] Interactive Prototype
-
-<br>
-
-
 
 
 
