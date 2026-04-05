@@ -5,31 +5,31 @@
     <item
         android:id="@+id/homeTab"
         android:enabled="true"
-        android:title="@string/tab_home"
-        app:showAsAction="ifRoom" />
+        android:icon="@drawable/ic_home"
+        android:title="@string/tab_home" />
 
     <item
         android:id="@+id/newDeckTab"
         android:enabled="true"
-        android:title="@string/tab_new_deck"
-        app:showAsAction="ifRoom" />
+        android:icon="@drawable/ic_add"
+        android:title="@string/tab_new_deck" />
 
     <item
         android:id="@+id/addCardTab"
         android:enabled="true"
-        android:title="@string/tab_add_card"
-        app:showAsAction="ifRoom" />
+        android:icon="@drawable/ic_add_card"
+        android:title="@string/tab_add_card" />
 
     <item
         android:id="@+id/studyTab"
         android:enabled="true"
-        android:title="@string/tab_study"
-        app:showAsAction="ifRoom" />
+        android:icon="@drawable/ic_study"
+        android:title="@string/tab_study" />
 
     <item
         android:id="@+id/calendarTab"
         android:enabled="true"
-        android:title="@string/tab_calendar"
-        app:showAsAction="ifRoom" />
+        android:icon="@drawable/ic_calendar"
+        android:title="@string/tab_calendar" />
 
 </menu>

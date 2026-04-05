@@ -2,6 +2,7 @@ package com.example.flashcardstudy
 
 import android.os.Bundle
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -24,10 +25,25 @@ class MainActivity : AppCompatActivity() {
     private val studyFragment = StudyFragment()
     private val calendarFragment = CalendarFragment()
 
+    private val backPressedCallback = object : OnBackPressedCallback(false) {
+        override fun handleOnBackPressed() {
+            if (bottomNavigationView.selectedItemId != R.id.homeTab) {
+                bottomNavigationView.selectedItemId = R.id.homeTab
+            } else {
+                isEnabled = false
+                onBackPressedDispatcher.onBackPressed()
+                isEnabled = true
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
+
+        onBackPressedDispatcher.addCallback(this, backPressedCallback)
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -49,21 +65,23 @@ class MainActivity : AppCompatActivity() {
         }
 
         bottomNavigationView.visibility = View.GONE
-        supportFragmentManager.beginTransaction().replace(R.id.main_frame_layout, WelcomeFragment())
-            .commit()
+        supportFragmentManager.beginTransaction().setReorderingAllowed(true)
+            .replace(R.id.main_frame_layout, WelcomeFragment()).commit()
     }
 
     fun onGetStarted() {
         bottomNavigationView.visibility = View.VISIBLE
         bottomNavigationView.selectedItemId = R.id.homeTab
+        backPressedCallback.isEnabled = true
     }
 
     fun openDeckDetail() {
-        supportFragmentManager.beginTransaction()
+        supportFragmentManager.beginTransaction().setReorderingAllowed(true)
             .replace(R.id.main_frame_layout, DeckDetailFragment()).addToBackStack(null).commit()
     }
 
     private fun replaceFragment(fragment: Fragment) {
-        supportFragmentManager.beginTransaction().replace(R.id.main_frame_layout, fragment).commit()
+        supportFragmentManager.beginTransaction().setReorderingAllowed(true)
+            .replace(R.id.main_frame_layout, fragment).commit()
     }
 }

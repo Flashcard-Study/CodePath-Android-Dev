@@ -13,6 +13,7 @@ class StudyFragment : Fragment() {
     val question = "What is the powerhouse of the cell?"
     val answer = "Mitochondria"
     var showAnswer = false
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -31,8 +32,5 @@ class StudyFragment : Fragment() {
         return view
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
 }
 
