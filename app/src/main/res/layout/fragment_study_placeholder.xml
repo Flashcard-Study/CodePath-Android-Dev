@@ -25,7 +25,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginHorizontal="20dp"
-            android:text="What is the powerhouse of the cell?"
+            android:text="Question"
             android:textAlignment="center"
             android:textAppearance="?attr/textAppearanceHeadlineSmall"
             app:layout_constraintBottom_toBottomOf="parent"
