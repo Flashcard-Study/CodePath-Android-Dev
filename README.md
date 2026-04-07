@@ -33,20 +33,20 @@ A focused flashcard app with study scheduling, progress tracking, a cram mode fo
 
 1. [ ] User can create a "New Deck" by entering a name, selecting a color, choosing an icon, and toggling private/public visibility.
 2. [ ] User can add a new card to a deck by entering "Front" and "Back" text, with options to "Save" or "Add Another card".
-3. [ ] User can tap a card to flip it over and reveal the back text.
-4. [ ]  User can grade their knowledge of a card after flipping it by selecting "Still learning" or "Got it".
-5. [ ] User can view a "Study History" screen featuring a monthly calendar grid.
-6. [ ] User can view a welcome/onboarding screen to get started with the app.
-7. [ ] User can view a Welcome screen with a "Get Started" button.
-8. [ ] User can navigate from the Welcome screen to the Dashboard.
-9. [ ] User can view a Dashboard screen with a visual layout of decks.
-10. [x] User can see 2–3 mock deck cards displayed on the Dashboard.
+3. [x] User can tap a card to flip it over and reveal the back text (static/local study list).
+4. [x]  User can grade their knowledge of a card after flipping it by selecting "Still learning" or "Got it" (local-only behavior).
+5. [x] User can view a "Study History" screen featuring a monthly calendar grid.
+6. [x] User can view a welcome/onboarding screen to get started with the app.
+7. [x] User can view a Welcome screen with a "Get Started" button.
+8. [x] User can navigate from the Welcome screen to the Dashboard.
+9. [x] User can view a Dashboard screen with a visual layout of decks.
+10. [x] User can see 2–3 mock deck cards displayed on the Dashboard (static UI).
 12. [x] User can see a "Create Deck" button .
 13. [x] User can navigate to the "Add Card" screen.
-14. [x] User can view input fields for "Front" and "Back" text.
+14. [x] User can view input fields for "Front" and "Back" text (UI shell).
 15. [x] User can view a flashcard study screen UI.
-16. [x] User can see a card with placeholder text.
-18. [x] User can view a Calendar screen with a monthly grid layout.
+16. [x] User can see a card with placeholder text / local mock questions.
+18. [x] User can view a Calendar screen with a monthly grid layout (mock progress data).
 20. [x] User can use bottom tab navigation to switch between main screens.
 
 
@@ -178,16 +178,25 @@ Issues to Complete next Sprint
 
 ## GitHub Project board
 
-[Add screenshot of your Project Board with the updated status of issues for Milestone 3. Note that these should include the updated issues you worked on for this sprint and not be a duplicate of Milestone 2 Project board.] <img src="YOUR_WIREFRAME_IMAGE_URL" width=600>
+<img src="CurrentSprint.png" width=600>
 
 ## Completed user stories
 
-- List the completed user stories from this unit
-- List any pending user stories / any user stories you decided to cut
-from the original requirements
+List the completed user stories from this unit
+- Foundational architecture is set up with `Deck` and `Flashcard` core data models.
+- `FlashcardRepository` + `MockFlashcardRepository` are implemented with temporary in-memory deck/card arrays.
+- Asynchronous mock loading is implemented using coroutine `delay(...)` in repository fetch functions.
+- Basic `HomeViewModel` and `StudyViewModel` are set up to expose repository data for Dashboard/Study integration.
+- Bottom tab navigation icons are implemented for Home, New Deck, Add Card, Study, and Calendar.
 
-[Add video/gif of your current application that shows build progress]
-<img src="YOUR_WIREFRAME_IMAGE_URL" width=600>
+List any pending user stories / any user stories you decided to cut from the original requirements
+- User can create a "New Deck" with full functionality (name, color, icon, private/public behavior).
+- User can add a new card to a deck with full save/add-another persistence flow.
+- Optional stories (continue widget resume behavior, mastery indicators, cram mode) remain pending.
+- Dashboard and Study screens are not fully wired to repository-backed ViewModel observers yet.
+
+
+<img src='./Unit9.gif' title='Unit 9 Progress' width='' alt='Unit 9 Progress' />
 
 ## App Demo Video
 
