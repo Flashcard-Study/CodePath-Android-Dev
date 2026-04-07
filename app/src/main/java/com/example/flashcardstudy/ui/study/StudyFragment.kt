@@ -55,4 +55,3 @@ class StudyFragment : Fragment() {
         super.onCreate(savedInstanceState)
     }
 }
-
