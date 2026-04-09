@@ -27,10 +27,16 @@ class MainActivity : AppCompatActivity() {
         val frontInput = findViewById<EditText>(R.id.editTextFront)
         val backInput = findViewById<EditText>(R.id.editTextBack)
         val saveButton = findViewById<Button>(R.id.buttonSave)
+        val deleteButton = findViewById<Button>(R.id.buttonDelete)
 
         saveButton.setOnClickListener {
-            val frontText = frontInput.text.toString()
-            val backText = backInput.text.toString()
+            val frontText = frontInput.text.toString().trim()
+            val backText = backInput.text.toString().trim()
+
+            if (frontText.isEmpty() || backText.isEmpty()) {
+                Toast.makeText(this, "Enter both sides of the card.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
 
             cards.add(Pair(frontText, backText))
 
@@ -38,6 +44,17 @@ class MainActivity : AppCompatActivity() {
             backInput.text.clear()
 
             Toast.makeText(this, "Card saved. Total cards: ${cards.size}", Toast.LENGTH_SHORT).show()
+        }
+
+        deleteButton.setOnClickListener {
+            if (cards.isNotEmpty()) {
+                cards.removeAt(cards.lastIndex)
+                frontInput.text.clear()
+                backInput.text.clear()
+                Toast.makeText(this, "Last card deleted. Total cards: ${cards.size}", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "No cards to delete.", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }
