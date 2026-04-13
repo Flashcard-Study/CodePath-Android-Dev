@@ -2,6 +2,7 @@ package com.example.flashcardstudy.ui.newdeck
 
 import android.os.Bundle
 import android.view.View
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.example.flashcardstudy.R
 import com.google.android.material.button.MaterialButton
@@ -9,7 +10,6 @@ import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
-import android.widget.TextView
 
 class NewDeckFragment : Fragment(R.layout.fragment_new_deck) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -24,7 +24,8 @@ class NewDeckFragment : Fragment(R.layout.fragment_new_deck) {
 
         switchPublic.setOnCheckedChangeListener { _, isChecked ->
             tvLabel.text = if (isChecked) "Public deck" else "Private deck"
-            tvSub.text = if (isChecked) "Anyone can find this deck" else "Only you can see this deck"
+            tvSub.text =
+                if (isChecked) "Anyone can find this deck" else "Only you can see this deck"
         }
 
         btnCreate.setOnClickListener {

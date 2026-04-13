@@ -11,8 +11,11 @@
     <string name="get_started">Get Started</string>
 
     <!-- Calendar -->
+    <string name="calendar_study_history">Study History</string>
     <string name="calendar_month_title">Month</string>
     <string name="calendar_weekly_progress">Weekly Progress</string>
+    <string name="heatmap_less">Less</string>
+    <string name="heatmap_more">More</string>
     <string name="day_sun">Sun</string>
     <string name="day_mon">Mon</string>
     <string name="day_tue">Tue</string>
