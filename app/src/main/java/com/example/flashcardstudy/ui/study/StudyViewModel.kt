@@ -9,7 +9,6 @@ import com.example.flashcardstudy.data.repository.RepositoryProvider
 import kotlinx.coroutines.launch
 
 class StudyViewModel : ViewModel() {
-
     private val repository = RepositoryProvider.flashcardRepository
 
     private val _flashcards = MutableLiveData<List<Flashcard>>(emptyList())

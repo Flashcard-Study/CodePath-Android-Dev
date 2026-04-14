@@ -27,6 +27,7 @@ class StudyFragment : Fragment() {
         val card = view.findViewById<MaterialCardView>(R.id.studyCard)
         val cardTV = card.findViewById<TextView>(R.id.cardContent)
         var index = 0
+
         cardTV.text = flashcards[index].question
         card.setOnClickListener {
             if (showAnswer) {
@@ -36,22 +37,22 @@ class StudyFragment : Fragment() {
             }
             showAnswer = !showAnswer
         }
+
         val gotIt = view.findViewById<Button>(R.id.gotIt)
         gotIt.setOnClickListener {
             index = (index + 1) % flashcards.size
             cardTV.text = flashcards[index].question
             showAnswer = false
         }
+
         val stillLearning = view.findViewById<Button>(R.id.stillLearning)
         stillLearning.setOnClickListener {
             index = (index + 1) % flashcards.size
             cardTV.text = flashcards[index].question
             showAnswer = false
         }
+
         return view
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
 }

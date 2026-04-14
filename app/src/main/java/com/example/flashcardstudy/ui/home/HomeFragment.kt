@@ -5,6 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.flashcardstudy.MainActivity
 import com.example.flashcardstudy.R
 
@@ -21,11 +23,21 @@ class HomeFragment : Fragment() {
         view.findViewById<View>(R.id.continueCard).setOnClickListener {
             (activity as? MainActivity)?.openDeckDetail()
         }
-        view.findViewById<View>(R.id.deckBiology).setOnClickListener {
-            (activity as? MainActivity)?.openDeckDetail()
+
+        view.findViewById<RecyclerView>(R.id.deckRecyclerView).apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = DeckAdapter(MOCK_DECKS) {
+                (activity as? MainActivity)?.openDeckDetail()
+            }
         }
-        view.findViewById<View>(R.id.deckSpanish).setOnClickListener {
-            (activity as? MainActivity)?.openDeckDetail()
-        }
+    }
+
+    companion object {
+        private val MOCK_DECKS = listOf(
+            Deck("Biology", "#009628", 12),
+            Deck("Spanish", "#E86C00", 8),
+            Deck("Mathematics", "#4A90D9", 20),
+            Deck("World History", "#9B59B6", 15)
+        )
     }
 }
