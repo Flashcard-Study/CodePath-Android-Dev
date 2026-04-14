@@ -196,8 +196,8 @@ List any pending user stories / any user stories you decided to cut from the ori
 - Optional stories (continue widget resume behavior, mastery indicators, cram mode) remain pending.
 - Dashboard and Study screens are not fully wired to repository-backed ViewModel observers yet.
 
+![Unit9ProgressFull](https://github.com/user-attachments/assets/a1592434-e89a-4619-9c36-c1fd41917a03)
 
-<img src='./Unit9.gif' title='Unit 9 Progress' width='' alt='Unit 9 Progress' />
 
 ## App Demo Video
 
