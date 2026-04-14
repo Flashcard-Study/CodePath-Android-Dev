@@ -202,3 +202,4 @@ List any pending user stories / any user stories you decided to cut from the ori
 ## App Demo Video
 
 - Embed the YouTube/Vimeo link of your Completed Demo Day prep video
+- [![Flashcard Study App Demo](https://img.youtube.com/vi/xZoga1CnMT4/maxresdefault.jpg)](https://www.youtube.com/watch?v=xZoga1CnMT4)
