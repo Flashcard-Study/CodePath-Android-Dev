@@ -178,7 +178,7 @@ Issues to Complete next Sprint
 
 ## GitHub Project board
 
-<img src="CurrentSprint.png" width=600>
+<img width="1084" height="865" alt="CurrentSprint" src="https://github.com/user-attachments/assets/8e754681-a27d-4303-8346-92d7862d7246" />
 
 ## Completed user stories
 
@@ -188,9 +188,10 @@ List the completed user stories from this unit
 - Asynchronous mock loading is implemented using coroutine `delay(...)` in repository fetch functions.
 - Basic `HomeViewModel` and `StudyViewModel` are set up to expose repository data for Dashboard/Study integration.
 - Bottom tab navigation icons are implemented for Home, New Deck, Add Card, Study, and Calendar.
+- User can create a "New Deck" with full functionality (name, color, icon, private/public behavior).
+
 
 List any pending user stories / any user stories you decided to cut from the original requirements
-- User can create a "New Deck" with full functionality (name, color, icon, private/public behavior).
 - User can add a new card to a deck with full save/add-another persistence flow.
 - Optional stories (continue widget resume behavior, mastery indicators, cram mode) remain pending.
 - Dashboard and Study screens are not fully wired to repository-backed ViewModel observers yet.
