@@ -20,9 +20,11 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 class MainActivity : AppCompatActivity() {
     private lateinit var bottomNavigationView: BottomNavigationView
     private var suppressNavListener = false
-    private val homeFragment = HomeFragment()
+    private var activeDeckId: String? = null
+    private var activeDeckName: String? = null
+    private var activeDeckColor: String = "#6C63FF"
     private val newDeckFragment = NewDeckFragment()
-    private val addCardFragment = AddCardFragment()
+    private val addCardFragment = AddCardFragment() // no-deck fallback for bottom nav
     private val studyFragment = StudyFragment()
     private val calendarFragment = CalendarFragment()
 
@@ -43,12 +45,20 @@ class MainActivity : AppCompatActivity() {
         bottomNavigationView.setOnItemSelectedListener { item ->
             if (!suppressNavListener) {
                 val fragment: Fragment = when (item.itemId) {
-                    R.id.homeTab -> homeFragment
+                    R.id.homeTab -> HomeFragment()
                     R.id.newDeckTab -> newDeckFragment
-                    R.id.addCardTab -> addCardFragment
+                    R.id.addCardTab -> {
+                        val id = activeDeckId
+                        val name = activeDeckName
+                        if (id != null && name != null) {
+                            AddCardFragment.newInstance(id, name, activeDeckColor)
+                        } else {
+                            addCardFragment
+                        }
+                    }
                     R.id.studyTab -> studyFragment
                     R.id.calendarTab -> calendarFragment
-                    else -> homeFragment
+                    else -> HomeFragment()
                 }
                 replaceFragment(fragment)
             }
@@ -63,6 +73,27 @@ class MainActivity : AppCompatActivity() {
     fun onGetStarted() {
         bottomNavigationView.visibility = View.VISIBLE
         bottomNavigationView.selectedItemId = R.id.homeTab
+    }
+
+    fun navigateToHome() {
+        bottomNavigationView.selectedItemId = R.id.homeTab
+    }
+
+    fun setActiveDeck(deckId: String, deckName: String, deckColor: String = "#6C63FF") {
+        activeDeckId = deckId
+        activeDeckName = deckName
+        activeDeckColor = deckColor
+    }
+
+    fun openAddCardForDeck(deckId: String, deckName: String, deckColor: String = "#6C63FF") {
+        val fragment = AddCardFragment.newInstance(deckId, deckName, deckColor)
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.main_frame_layout, fragment)
+            .addToBackStack(null)
+            .commit()
+        suppressNavListener = true
+        bottomNavigationView.selectedItemId = R.id.addCardTab
+        suppressNavListener = false
     }
 
     fun openDeckDetail() {

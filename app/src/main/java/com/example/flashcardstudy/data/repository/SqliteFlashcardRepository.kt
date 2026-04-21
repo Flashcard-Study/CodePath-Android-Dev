@@ -16,6 +16,14 @@ class SqliteFlashcardRepository(context: Context) : FlashcardRepository {
         dbHelper.getAllDecks()
     }
 
+    override suspend fun createDeck(deck: Deck): Boolean = withContext(Dispatchers.IO) {
+        dbHelper.insertDeck(deck)
+    }
+
+    override suspend fun addFlashcard(flashcard: Flashcard): Boolean = withContext(Dispatchers.IO) {
+        dbHelper.insertFlashcard(flashcard)
+    }
+
     override suspend fun getFlashcardsForDeck(deckId: String): List<Flashcard> = withContext(Dispatchers.IO) {
         dbHelper.getFlashcardsForDeck(deckId)
     }
