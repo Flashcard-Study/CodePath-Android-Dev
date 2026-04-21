@@ -9,7 +9,6 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.toColorInt
 import androidx.recyclerview.widget.RecyclerView
 import com.example.flashcardstudy.R
-import com.example.flashcardstudy.deckId
 import com.google.android.material.card.MaterialCardView
 
 class DeckAdapter(
@@ -35,10 +34,7 @@ class DeckAdapter(
         holder.cardCount.text = "${deck.cardCount} cards"
         holder.ribbon.setBackgroundColor(color)
         holder.card.setCardBackgroundColor(ColorUtils.blendARGB(Color.WHITE, color, 0.15f))
-        holder.itemView.setOnClickListener {
-            onDeckClick(deck)
-            deckId = position
-        }
+        holder.itemView.setOnClickListener { onDeckClick(deck) }
     }
 
     override fun getItemCount() = decks.size
