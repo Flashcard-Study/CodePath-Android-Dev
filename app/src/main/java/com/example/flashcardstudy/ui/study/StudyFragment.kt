@@ -1,5 +1,10 @@
 package com.example.flashcardstudy.ui.study
 
+import android.content.Context
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -13,10 +18,11 @@ import com.example.flashcardstudy.Flashcard
 import com.example.flashcardstudy.R
 import com.example.flashcardstudy.data.database.DatabaseVerifier
 import com.google.android.material.card.MaterialCardView
+import kotlin.math.sqrt
 
-class StudyFragment : Fragment() {
+class StudyFragment : Fragment(), SensorEventListener {
     private val viewModel: StudyViewModel by viewModels()
-    private var flashcards = listOf<Flashcard>()
+    private var flashcards = mutableListOf<Flashcard>()
     private var currentIndex = 0
     private var showAnswer = false
 
@@ -28,6 +34,10 @@ class StudyFragment : Fragment() {
     private lateinit var totalCardsCount: TextView
     private lateinit var masteredCount: TextView
     private lateinit var learningCount: TextView
+
+    private lateinit var sensorManager: SensorManager
+    private var accelerometer: Sensor? = null
+    private var lastShakeTime = 0L
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -42,6 +52,8 @@ class StudyFragment : Fragment() {
         totalCardsCount = view.findViewById(R.id.totalCardsCount)
         masteredCount = view.findViewById(R.id.masteredCount)
         learningCount = view.findViewById(R.id.learningCount)
+        sensorManager = requireContext().getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
         setupObservers()
         setupClickListeners()
@@ -58,7 +70,7 @@ class StudyFragment : Fragment() {
 
     private fun setupObservers() {
         viewModel.flashcards.observe(viewLifecycleOwner) { cards ->
-            flashcards = cards
+            flashcards = cards.toMutableList()
             if (cards.isNotEmpty()) {
                 currentIndex = 0
                 displayCard()
@@ -121,12 +133,49 @@ class StudyFragment : Fragment() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        accelerometer?.also {
+            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        sensorManager.unregisterListener(this)
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+
+    override fun onSensorChanged(event: SensorEvent?) {
+        if (event == null || event.sensor.type != Sensor.TYPE_ACCELEROMETER || flashcards.isEmpty()) return
+
+        val x = event.values[0]
+        val y = event.values[1]
+        val z = event.values[2]
+
+        val acceleration = sqrt((x * x + y * y + z * z).toDouble()).toFloat()
+        val delta = acceleration - SensorManager.GRAVITY_EARTH
+        val now = System.currentTimeMillis()
+
+        if (delta > SHAKE_THRESHOLD && now - lastShakeTime > SHAKE_COOLDOWN_MS) {
+            lastShakeTime = now
+            flashcards.shuffle()
+            currentIndex = 0
+            showAnswer = false
+            displayCard()
+            Log.d("StudyFragment", "Deck shuffled by shake")
+        }
+    }
+
     fun loadDeck(deckId: String) {
         viewModel.loadDeckFlashcards(deckId)
     }
 
     companion object {
         private const val ARG_DECK_ID = "deck_id"
+        private const val SHAKE_THRESHOLD = 8f
+        private const val SHAKE_COOLDOWN_MS = 1000L
 
         fun newInstance(deckId: String): StudyFragment {
             return StudyFragment().apply {
