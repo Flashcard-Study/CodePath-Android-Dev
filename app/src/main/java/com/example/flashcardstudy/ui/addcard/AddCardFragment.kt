@@ -6,11 +6,15 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.example.flashcardstudy.Flashcard
 import com.example.flashcardstudy.R
+import com.example.flashcardstudy.deckId
+import com.example.flashcardstudy.deck_titles
+import com.example.flashcardstudy.flashcards
 
 class AddCardFragment : Fragment(R.layout.fragment_add_card) {
 
-    private val cards = mutableListOf<Pair<String, String>>()
+//    private val cards = mutableListOf<Pair<String, String>>()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -18,7 +22,7 @@ class AddCardFragment : Fragment(R.layout.fragment_add_card) {
         val frontInput = view.findViewById<EditText>(R.id.editTextFront)
         val backInput = view.findViewById<EditText>(R.id.editTextBack)
         val saveButton = view.findViewById<Button>(R.id.buttonSave)
-        val addAnotherButton = view.findViewById<Button>(R.id.buttonAddAnother)
+//        val addAnotherButton = view.findViewById<Button>(R.id.buttonAddAnother)
         val deleteButton = view.findViewById<Button>(R.id.buttonDelete)
 
         saveButton.setOnClickListener {
@@ -31,35 +35,35 @@ class AddCardFragment : Fragment(R.layout.fragment_add_card) {
                 return@setOnClickListener
             }
 
-            cards.add(Pair(frontText, backText))
+            flashcards[deckId].add(Flashcard(frontText, backText))
             frontInput.text.clear()
             backInput.text.clear()
 
             Toast.makeText(
                 requireContext(),
-                "Card saved. Total cards: ${cards.size}",
+                "Card saved to ${deck_titles[deckId]} deck. Total cards: ${flashcards[deckId].size}",
                 Toast.LENGTH_SHORT
             ).show()
         }
 
-        addAnotherButton.setOnClickListener {
-            frontInput.text.clear()
-            backInput.text.clear()
-            Toast.makeText(
-                requireContext(),
-                "Add another card. Total saved: ${cards.size}",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
+//        addAnotherButton.setOnClickListener {
+//            frontInput.text.clear()
+//            backInput.text.clear()
+//            Toast.makeText(
+//                requireContext(),
+//                "Add another card. Total saved: ${cards.size}",
+//                Toast.LENGTH_SHORT
+//            ).show()
+//        }
 
         deleteButton.setOnClickListener {
-            if (cards.isNotEmpty()) {
-                cards.removeAt(cards.lastIndex)
+            if (flashcards[deckId].isNotEmpty()) {
+                flashcards[deckId].removeAt(flashcards[deckId].lastIndex)
                 frontInput.text.clear()
                 backInput.text.clear()
                 Toast.makeText(
                     requireContext(),
-                    "Last card deleted. Total cards: ${cards.size}",
+                    "Last card deleted. Total cards: ${flashcards[deckId].size}",
                     Toast.LENGTH_SHORT
                 ).show()
             } else {
