@@ -9,17 +9,10 @@ data class Deck(
 ) {
     companion object {
         fun fromDatabaseDeck(dbDeck: com.example.flashcardstudy.Deck): Deck {
-            val color = when (dbDeck.name.lowercase()) {
-                "biology" -> "#009628"
-                "spanish" -> "#E86C00"
-                "mathematics" -> "#4A90D9"
-                "world history" -> "#9B59B6"
-                else -> "#666666"
-            }
             return Deck(
                 id = dbDeck.id,
                 name = dbDeck.name,
-                color = color,
+                color = dbDeck.color.ifBlank { "#6C63FF" },
                 cardCount = dbDeck.cardCount,
                 subtitle = dbDeck.subtitle
             )

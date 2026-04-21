@@ -16,7 +16,10 @@ class FlashcardDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATA
                 $COLUMN_DECK_NAME TEXT NOT NULL,
                 $COLUMN_DECK_SUBTITLE TEXT,
                 $COLUMN_DECK_CARD_COUNT INTEGER DEFAULT 0,
-                $COLUMN_DECK_LAST_STUDIED INTEGER DEFAULT 0
+                $COLUMN_DECK_LAST_STUDIED INTEGER DEFAULT 0,
+                $COLUMN_DECK_COLOR TEXT DEFAULT '#6C63FF',
+                $COLUMN_DECK_ICON TEXT DEFAULT '',
+                $COLUMN_DECK_IS_PUBLIC INTEGER DEFAULT 0
             )
         """)
 
@@ -48,6 +51,11 @@ class FlashcardDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATA
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         if (oldVersion < 2) {
             db.execSQL("ALTER TABLE $TABLE_DECKS ADD COLUMN $COLUMN_DECK_LAST_STUDIED INTEGER DEFAULT 0")
+        }
+        if (oldVersion < 3) {
+            db.execSQL("ALTER TABLE $TABLE_DECKS ADD COLUMN $COLUMN_DECK_COLOR TEXT DEFAULT '#6C63FF'")
+            db.execSQL("ALTER TABLE $TABLE_DECKS ADD COLUMN $COLUMN_DECK_ICON TEXT DEFAULT ''")
+            db.execSQL("ALTER TABLE $TABLE_DECKS ADD COLUMN $COLUMN_DECK_IS_PUBLIC INTEGER DEFAULT 0")
         }
     }
 
@@ -127,12 +135,29 @@ class FlashcardDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATA
                     id = it.getString(it.getColumnIndexOrThrow(COLUMN_DECK_ID)),
                     name = it.getString(it.getColumnIndexOrThrow(COLUMN_DECK_NAME)),
                     subtitle = it.getString(it.getColumnIndexOrThrow(COLUMN_DECK_SUBTITLE)) ?: "",
-                    cardCount = it.getInt(it.getColumnIndexOrThrow(COLUMN_DECK_CARD_COUNT))
+                    cardCount = it.getInt(it.getColumnIndexOrThrow(COLUMN_DECK_CARD_COUNT)),
+                    color = it.getString(it.getColumnIndexOrThrow(COLUMN_DECK_COLOR)) ?: "#6C63FF",
+                    icon = it.getString(it.getColumnIndexOrThrow(COLUMN_DECK_ICON)) ?: "",
+                    isPublic = it.getInt(it.getColumnIndexOrThrow(COLUMN_DECK_IS_PUBLIC)) != 0
                 )
                 decks.add(deck)
             }
         }
         return decks
+    }
+
+    fun insertDeck(deck: Deck): Boolean {
+        val db = writableDatabase
+        val values = ContentValues().apply {
+            put(COLUMN_DECK_ID, deck.id)
+            put(COLUMN_DECK_NAME, deck.name)
+            put(COLUMN_DECK_SUBTITLE, deck.subtitle)
+            put(COLUMN_DECK_CARD_COUNT, deck.cardCount)
+            put(COLUMN_DECK_COLOR, deck.color)
+            put(COLUMN_DECK_ICON, deck.icon)
+            put(COLUMN_DECK_IS_PUBLIC, if (deck.isPublic) 1 else 0)
+        }
+        return db.insert(TABLE_DECKS, null, values) != -1L
     }
 
     fun updateDeckLastStudied(deckId: String) {
@@ -162,11 +187,32 @@ class FlashcardDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATA
                     id = it.getString(it.getColumnIndexOrThrow(COLUMN_DECK_ID)),
                     name = it.getString(it.getColumnIndexOrThrow(COLUMN_DECK_NAME)),
                     subtitle = it.getString(it.getColumnIndexOrThrow(COLUMN_DECK_SUBTITLE)) ?: "",
-                    cardCount = it.getInt(it.getColumnIndexOrThrow(COLUMN_DECK_CARD_COUNT))
+                    cardCount = it.getInt(it.getColumnIndexOrThrow(COLUMN_DECK_CARD_COUNT)),
+                    color = it.getString(it.getColumnIndexOrThrow(COLUMN_DECK_COLOR)) ?: "#6C63FF",
+                    icon = it.getString(it.getColumnIndexOrThrow(COLUMN_DECK_ICON)) ?: "",
+                    isPublic = it.getInt(it.getColumnIndexOrThrow(COLUMN_DECK_IS_PUBLIC)) != 0
                 )
             }
         }
         return null
+    }
+
+    fun insertFlashcard(flashcard: Flashcard): Boolean {
+        val db = writableDatabase
+        val values = ContentValues().apply {
+            put(COLUMN_CARD_ID, flashcard.id)
+            put(COLUMN_CARD_DECK_ID, flashcard.deckId)
+            put(COLUMN_CARD_QUESTION, flashcard.question)
+            put(COLUMN_CARD_ANSWER, flashcard.answer)
+        }
+        val inserted = db.insert(TABLE_FLASHCARDS, null, values) != -1L
+        if (inserted) {
+            db.execSQL(
+                "UPDATE $TABLE_DECKS SET $COLUMN_DECK_CARD_COUNT = $COLUMN_DECK_CARD_COUNT + 1 WHERE $COLUMN_DECK_ID = ?",
+                arrayOf(flashcard.deckId)
+            )
+        }
+        return inserted
     }
 
     fun getFlashcardsForDeck(deckId: String): List<Flashcard> {
@@ -278,7 +324,7 @@ class FlashcardDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATA
 
     companion object {
         private const val DATABASE_NAME = "flashcard_study.db"
-        private const val DATABASE_VERSION = 2
+        private const val DATABASE_VERSION = 3
 
         // Table names
         const val TABLE_DECKS = "decks"
@@ -291,6 +337,9 @@ class FlashcardDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATA
         const val COLUMN_DECK_SUBTITLE = "subtitle"
         const val COLUMN_DECK_CARD_COUNT = "card_count"
         const val COLUMN_DECK_LAST_STUDIED = "last_studied"
+        const val COLUMN_DECK_COLOR = "color"
+        const val COLUMN_DECK_ICON = "icon"
+        const val COLUMN_DECK_IS_PUBLIC = "is_public"
 
         // Flashcard columns
         const val COLUMN_CARD_ID = "id"

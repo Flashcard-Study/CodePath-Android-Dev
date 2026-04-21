@@ -29,6 +29,7 @@ class HomeFragment : Fragment() {
         }
 
         deckAdapter = DeckAdapter(emptyList()) { deck ->
+            (activity as? MainActivity)?.setActiveDeck(deck.id, deck.name, deck.color)
             (activity as? MainActivity)?.openStudyWithDeck(deck.id)
         }
 
