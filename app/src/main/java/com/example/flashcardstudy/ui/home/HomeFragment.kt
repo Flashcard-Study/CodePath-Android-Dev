@@ -34,10 +34,10 @@ class HomeFragment : Fragment() {
 
     companion object {
         private val MOCK_DECKS = listOf(
-            Deck(0, "Biology", "#009628", 12),
-            Deck(1, "Spanish", "#E86C00", 8),
-            Deck(2, "Mathematics", "#4A90D9", 20),
-            Deck(3, "World History", "#9B59B6", 15)
+            Deck("Biology", "#009628", 12),
+            Deck("Spanish", "#E86C00", 8),
+            Deck("Mathematics", "#4A90D9", 20),
+            Deck("World History", "#9B59B6", 15)
         )
     }
 }

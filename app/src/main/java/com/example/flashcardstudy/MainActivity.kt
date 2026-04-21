@@ -16,38 +16,6 @@ import com.example.flashcardstudy.ui.study.StudyFragment
 import com.example.flashcardstudy.ui.welcome.WelcomeFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
-var deckId = 0;
-var deck_titles = mutableListOf("Biology", "Spanish", "Mathematics", "World History")
-var flashcards = mutableListOf(
-    mutableListOf(
-        Flashcard("What is the powerhouse of the cell?", "Mitochondria"),
-        Flashcard("Which molecule carries genetic information?", "DNA"),
-        Flashcard("What is the main function of red blood cells?", "Carrying oxygen"),
-        Flashcard("What is the term for keeping internal conditions stable?", "Homeostasis"),
-        Flashcard("What is the largest organ in the human body?", "Skin")
-    ),
-    mutableListOf(
-        Flashcard("What does “Hola” mean?", "Hello"),
-        Flashcard("How do you say “Thank you” in Spanish?", "Gracias"),
-        Flashcard("What is the Spanish word for “Water”?", "Agua"),
-        Flashcard("How do you say “Good morning” in Spanish?", "Buenos días"),
-        Flashcard("What does “Adiós” mean?", "Goodbye")
-    ),
-    mutableListOf(
-        Flashcard("What is 5 + 3?", "8"),
-        Flashcard("What is 9 − 4?", "5"),
-        Flashcard("What is 6 × 2?", "12"),
-        Flashcard("What is 15 ÷ 3?", "5"),
-        Flashcard("What is the square of 4?", "16")
-    ),
-    mutableListOf(
-        Flashcard("Who was the first President of the United States?", "George Washington"),
-        Flashcard("In which country did the pyramids of Giza originate?", "Egypt"),
-        Flashcard("What major event began in 1939?", "World War II"),
-        Flashcard("When did the French Revolution begin?", "1789"),
-        Flashcard("What wall fell in 1989, symbolizing the end of the Cold War?", "Berlin Wall")
-    )
-)
 class MainActivity : AppCompatActivity() {
     private lateinit var bottomNavigationView: BottomNavigationView
     private val homeFragment = HomeFragment()
