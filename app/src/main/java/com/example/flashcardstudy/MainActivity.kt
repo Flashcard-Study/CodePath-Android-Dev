@@ -101,6 +101,14 @@ class MainActivity : AppCompatActivity() {
             .replace(R.id.main_frame_layout, DeckDetailFragment()).addToBackStack(null).commit()
     }
 
+    fun openDeckDetail(deckId: String, deckName: String, deckColor: String = "#6C63FF") {
+        val fragment = DeckDetailFragment.newInstance(deckId, deckName, deckColor)
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.main_frame_layout, fragment)
+            .addToBackStack(null)
+            .commit()
+    }
+
     fun openStudyWithDeck(deckId: String) {
         val newStudyFragment = StudyFragment.newInstance(deckId)
         

@@ -30,7 +30,7 @@ class HomeFragment : Fragment() {
 
         deckAdapter = DeckAdapter(emptyList()) { deck ->
             (activity as? MainActivity)?.setActiveDeck(deck.id, deck.name, deck.color)
-            (activity as? MainActivity)?.openStudyWithDeck(deck.id)
+            (activity as? MainActivity)?.openDeckDetail(deck.id, deck.name, deck.color)
         }
 
         view.findViewById<RecyclerView>(R.id.deckRecyclerView).apply {
@@ -45,7 +45,7 @@ class HomeFragment : Fragment() {
 
         viewModel.mostRecentDeck.observe(viewLifecycleOwner) { deck ->
             deck?.let {
-                (activity as? MainActivity)?.openStudyWithDeck(it.id)
+                (activity as? MainActivity)?.openDeckDetail(it.id, it.name, it.color)
             }
         }
     }
