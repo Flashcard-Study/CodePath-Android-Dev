@@ -12,7 +12,7 @@ import com.example.flashcardstudy.R
 import com.google.android.material.card.MaterialCardView
 
 class DeckAdapter(
-    private val decks: List<Deck>,
+    private var decks: List<Deck>,
     private val onDeckClick: (Deck) -> Unit
 ) : RecyclerView.Adapter<DeckAdapter.DeckViewHolder>() {
     class DeckViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -38,4 +38,9 @@ class DeckAdapter(
     }
 
     override fun getItemCount() = decks.size
+
+    fun updateDecks(newDecks: List<Deck>) {
+        decks = newDecks
+        notifyDataSetChanged()
+    }
 }

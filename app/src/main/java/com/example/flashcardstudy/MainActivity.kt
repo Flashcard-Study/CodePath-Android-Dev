@@ -12,12 +12,14 @@ import com.example.flashcardstudy.ui.calendar.CalendarFragment
 import com.example.flashcardstudy.ui.deckdetail.DeckDetailFragment
 import com.example.flashcardstudy.ui.home.HomeFragment
 import com.example.flashcardstudy.ui.newdeck.NewDeckFragment
+import com.example.flashcardstudy.data.repository.RepositoryProvider
 import com.example.flashcardstudy.ui.study.StudyFragment
 import com.example.flashcardstudy.ui.welcome.WelcomeFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
     private lateinit var bottomNavigationView: BottomNavigationView
+    private var suppressNavListener = false
     private val homeFragment = HomeFragment()
     private val newDeckFragment = NewDeckFragment()
     private val addCardFragment = AddCardFragment()
@@ -26,6 +28,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        RepositoryProvider.initialize(this)
+        
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
@@ -36,15 +41,17 @@ class MainActivity : AppCompatActivity() {
 
         bottomNavigationView = findViewById(R.id.bottomNavigationView)
         bottomNavigationView.setOnItemSelectedListener { item ->
-            val fragment: Fragment = when (item.itemId) {
-                R.id.homeTab -> homeFragment
-                R.id.newDeckTab -> newDeckFragment
-                R.id.addCardTab -> addCardFragment
-                R.id.studyTab -> studyFragment
-                R.id.calendarTab -> calendarFragment
-                else -> homeFragment
+            if (!suppressNavListener) {
+                val fragment: Fragment = when (item.itemId) {
+                    R.id.homeTab -> homeFragment
+                    R.id.newDeckTab -> newDeckFragment
+                    R.id.addCardTab -> addCardFragment
+                    R.id.studyTab -> studyFragment
+                    R.id.calendarTab -> calendarFragment
+                    else -> homeFragment
+                }
+                replaceFragment(fragment)
             }
-            replaceFragment(fragment)
             true
         }
 
@@ -61,6 +68,18 @@ class MainActivity : AppCompatActivity() {
     fun openDeckDetail() {
         supportFragmentManager.beginTransaction()
             .replace(R.id.main_frame_layout, DeckDetailFragment()).addToBackStack(null).commit()
+    }
+
+    fun openStudyWithDeck(deckId: String) {
+        val newStudyFragment = StudyFragment.newInstance(deckId)
+        
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.main_frame_layout, newStudyFragment)
+            .commit()
+
+        suppressNavListener = true
+        bottomNavigationView.selectedItemId = R.id.studyTab
+        suppressNavListener = false
     }
 
     private fun replaceFragment(fragment: Fragment) {
