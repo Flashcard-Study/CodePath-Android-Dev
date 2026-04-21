@@ -17,18 +17,29 @@ class HomeViewModel : ViewModel() {
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
 
+    private val _mostRecentDeck = MutableLiveData<Deck?>()
+    val mostRecentDeck: LiveData<Deck?> = _mostRecentDeck
+
     init {
-        refreshDecks()
+        loadDecks()
     }
 
-    fun refreshDecks() {
+    fun loadDecks() {
         viewModelScope.launch {
             _isLoading.postValue(true)
             try {
-                _decks.postValue(repository.getDecks())
+                val deckList = repository.getDecks()
+                _decks.postValue(deckList)
             } finally {
                 _isLoading.postValue(false)
             }
+        }
+    }
+
+    fun getMostRecentDeck() {
+        viewModelScope.launch {
+            val deck = repository.getMostRecentlyStudiedDeck()
+            _mostRecentDeck.postValue(deck)
         }
     }
 }

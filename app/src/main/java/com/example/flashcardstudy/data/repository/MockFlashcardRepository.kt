@@ -2,6 +2,8 @@ package com.example.flashcardstudy.data.repository
 
 import com.example.flashcardstudy.Deck
 import com.example.flashcardstudy.Flashcard
+import com.example.flashcardstudy.data.database.StudyProgress
+import com.example.flashcardstudy.data.database.StudyStats
 import kotlinx.coroutines.delay
 
 class MockFlashcardRepository : FlashcardRepository {
@@ -77,9 +79,37 @@ class MockFlashcardRepository : FlashcardRepository {
         return decks.toList()
     }
 
+    override suspend fun createDeck(deck: Deck): Boolean {
+        decks.add(deck)
+        return true
+    }
+
+    override suspend fun addFlashcard(flashcard: Flashcard): Boolean {
+        flashcards.add(flashcard)
+        return true
+    }
+
     override suspend fun getFlashcardsForDeck(deckId: String): List<Flashcard> {
         delay(CARDS_DELAY_MS)
         return flashcards.filter { it.deckId == deckId }
+    }
+
+    override suspend fun recordStudyProgress(cardId: String, deckId: String, status: String) {
+    }
+
+    override suspend fun getStudyProgressForDeck(deckId: String): List<StudyProgress> {
+        return emptyList()
+    }
+
+    override suspend fun getStudyStatsForDeck(deckId: String): StudyStats {
+        return StudyStats()
+    }
+
+    override suspend fun updateDeckLastStudied(deckId: String) {
+    }
+
+    override suspend fun getMostRecentlyStudiedDeck(): Deck? {
+        return decks.firstOrNull()
     }
 
     companion object {
