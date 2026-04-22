@@ -7,12 +7,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
+import com.example.flashcardstudy.data.repository.RepositoryProvider
 import com.example.flashcardstudy.ui.addcard.AddCardFragment
 import com.example.flashcardstudy.ui.calendar.CalendarFragment
 import com.example.flashcardstudy.ui.deckdetail.DeckDetailFragment
 import com.example.flashcardstudy.ui.home.HomeFragment
 import com.example.flashcardstudy.ui.newdeck.NewDeckFragment
-import com.example.flashcardstudy.data.repository.RepositoryProvider
 import com.example.flashcardstudy.ui.study.StudyFragment
 import com.example.flashcardstudy.ui.welcome.WelcomeFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -30,9 +30,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
         RepositoryProvider.initialize(this)
-        
+
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
@@ -56,6 +56,7 @@ class MainActivity : AppCompatActivity() {
                             addCardFragment
                         }
                     }
+
                     R.id.studyTab -> studyFragment
                     R.id.calendarTab -> calendarFragment
                     else -> HomeFragment()
@@ -111,7 +112,7 @@ class MainActivity : AppCompatActivity() {
 
     fun openStudyWithDeck(deckId: String) {
         val newStudyFragment = StudyFragment.newInstance(deckId)
-        
+
         supportFragmentManager.beginTransaction()
             .replace(R.id.main_frame_layout, newStudyFragment)
             .commit()

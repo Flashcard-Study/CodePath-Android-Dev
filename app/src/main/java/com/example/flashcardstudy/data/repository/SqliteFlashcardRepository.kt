@@ -24,21 +24,30 @@ class SqliteFlashcardRepository(context: Context) : FlashcardRepository {
         dbHelper.insertFlashcard(flashcard)
     }
 
-    override suspend fun getFlashcardsForDeck(deckId: String): List<Flashcard> = withContext(Dispatchers.IO) {
-        dbHelper.getFlashcardsForDeck(deckId)
-    }
+    override suspend fun importDeckWithCards(deck: Deck, cards: List<Flashcard>): Boolean =
+        withContext(Dispatchers.IO) {
+            dbHelper.importDeckWithCards(deck, cards)
+        }
 
-    override suspend fun recordStudyProgress(cardId: String, deckId: String, status: String) = withContext(Dispatchers.IO) {
-        dbHelper.recordStudyProgress(cardId, deckId, status)
-    }
+    override suspend fun getFlashcardsForDeck(deckId: String): List<Flashcard> =
+        withContext(Dispatchers.IO) {
+            dbHelper.getFlashcardsForDeck(deckId)
+        }
 
-    override suspend fun getStudyProgressForDeck(deckId: String): List<StudyProgress> = withContext(Dispatchers.IO) {
-        dbHelper.getStudyProgressForDeck(deckId)
-    }
+    override suspend fun recordStudyProgress(cardId: String, deckId: String, status: String) =
+        withContext(Dispatchers.IO) {
+            dbHelper.recordStudyProgress(cardId, deckId, status)
+        }
 
-    override suspend fun getStudyStatsForDeck(deckId: String): StudyStats = withContext(Dispatchers.IO) {
-        dbHelper.getStudyStatsForDeck(deckId)
-    }
+    override suspend fun getStudyProgressForDeck(deckId: String): List<StudyProgress> =
+        withContext(Dispatchers.IO) {
+            dbHelper.getStudyProgressForDeck(deckId)
+        }
+
+    override suspend fun getStudyStatsForDeck(deckId: String): StudyStats =
+        withContext(Dispatchers.IO) {
+            dbHelper.getStudyStatsForDeck(deckId)
+        }
 
     override suspend fun updateDeckLastStudied(deckId: String) = withContext(Dispatchers.IO) {
         dbHelper.updateDeckLastStudied(deckId)
