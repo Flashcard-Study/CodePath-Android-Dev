@@ -61,12 +61,20 @@ class AddCardFragment : Fragment(R.layout.fragment_add_card) {
             val back = backInput.text.toString().trim()
 
             if (front.isEmpty() || back.isEmpty()) {
-                Toast.makeText(requireContext(), "Enter both sides of the card.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    "Enter both sides of the card.",
+                    Toast.LENGTH_SHORT
+                ).show()
                 return@setOnClickListener
             }
 
             if (currentDeckId == null) {
-                Toast.makeText(requireContext(), "No deck selected. Open a deck first.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    "No deck selected. Open a deck first.",
+                    Toast.LENGTH_SHORT
+                ).show()
                 return@setOnClickListener
             }
 
@@ -82,9 +90,14 @@ class AddCardFragment : Fragment(R.layout.fragment_add_card) {
                 if (success) {
                     frontInput.text.clear()
                     backInput.text.clear()
-                    Toast.makeText(requireContext(), "Card saved to \"$currentDeckName\"!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        requireContext(),
+                        "Card saved to \"$currentDeckName\"!",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 } else {
-                    Toast.makeText(requireContext(), "Failed to save card.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Failed to save card.", Toast.LENGTH_SHORT)
+                        .show()
                 }
             }
         }
@@ -107,7 +120,11 @@ class AddCardFragment : Fragment(R.layout.fragment_add_card) {
         private const val ARG_DECK_NAME = "deck_name"
         private const val ARG_DECK_COLOR = "deck_color"
 
-        fun newInstance(deckId: String, deckName: String, deckColor: String = "#6C63FF"): AddCardFragment {
+        fun newInstance(
+            deckId: String,
+            deckName: String,
+            deckColor: String = "#6C63FF"
+        ): AddCardFragment {
             return AddCardFragment().apply {
                 arguments = Bundle().apply {
                     putString(ARG_DECK_ID, deckId)

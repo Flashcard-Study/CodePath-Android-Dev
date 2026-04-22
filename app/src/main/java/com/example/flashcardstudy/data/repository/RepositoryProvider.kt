@@ -12,5 +12,6 @@ object RepositoryProvider {
     }
 
     val flashcardRepository: FlashcardRepository
-        get() = repository ?: throw IllegalStateException("RepositoryProvider must be initialized first")
+        get() = repository
+            ?: throw IllegalStateException("RepositoryProvider must be initialized first")
 }

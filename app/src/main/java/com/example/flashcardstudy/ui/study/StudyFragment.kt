@@ -30,7 +30,7 @@ class StudyFragment : Fragment(), SensorEventListener {
     private lateinit var cardTV: TextView
     private lateinit var gotItButton: Button
     private lateinit var stillLearningButton: Button
-    
+
     private lateinit var totalCardsCount: TextView
     private lateinit var masteredCount: TextView
     private lateinit var learningCount: TextView
@@ -43,12 +43,12 @@ class StudyFragment : Fragment(), SensorEventListener {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         val view = inflater.inflate(R.layout.fragment_study_placeholder, container, false)
-        
+
         card = view.findViewById(R.id.studyCard)
         cardTV = card.findViewById(R.id.cardContent)
         gotItButton = view.findViewById(R.id.gotIt)
         stillLearningButton = view.findViewById(R.id.stillLearning)
-        
+
         totalCardsCount = view.findViewById(R.id.totalCardsCount)
         masteredCount = view.findViewById(R.id.masteredCount)
         learningCount = view.findViewById(R.id.learningCount)
@@ -57,7 +57,7 @@ class StudyFragment : Fragment(), SensorEventListener {
 
         setupObservers()
         setupClickListeners()
-        
+
         arguments?.getString(ARG_DECK_ID)?.let { deckId ->
             Log.d("StudyFragment", "Loading deck from arguments: $deckId")
             viewModel.loadDeckFlashcards(deckId)
@@ -78,7 +78,7 @@ class StudyFragment : Fragment(), SensorEventListener {
                 cardTV.text = "No cards available"
             }
         }
-        
+
         viewModel.studyStats.observe(viewLifecycleOwner) { stats ->
             totalCardsCount.text = stats.totalCards.toString()
             masteredCount.text = stats.masteredCards.toString()
@@ -89,7 +89,7 @@ class StudyFragment : Fragment(), SensorEventListener {
     private fun setupClickListeners() {
         card.setOnClickListener {
             if (flashcards.isEmpty()) return@setOnClickListener
-            
+
             if (showAnswer) {
                 cardTV.text = flashcards[currentIndex].question
             } else {
@@ -100,13 +100,13 @@ class StudyFragment : Fragment(), SensorEventListener {
 
         gotItButton.setOnClickListener {
             if (flashcards.isEmpty()) return@setOnClickListener
-            
+
             val currentCard = flashcards[currentIndex]
             Log.d("StudyFragment", "Got It clicked for card: ${currentCard.id}")
-            
+
             viewModel.recordGrade(currentCard.id, "got_it")
             DatabaseVerifier.verifyStudyProgress(requireContext())
-            
+
             currentIndex = (currentIndex + 1) % flashcards.size
             showAnswer = false
             displayCard()
@@ -114,13 +114,13 @@ class StudyFragment : Fragment(), SensorEventListener {
 
         stillLearningButton.setOnClickListener {
             if (flashcards.isEmpty()) return@setOnClickListener
-            
+
             val currentCard = flashcards[currentIndex]
             Log.d("StudyFragment", "Still Learning clicked for card: ${currentCard.id}")
-            
+
             viewModel.recordGrade(currentCard.id, "still_learning")
             DatabaseVerifier.verifyStudyProgress(requireContext())
-            
+
             currentIndex = (currentIndex + 1) % flashcards.size
             showAnswer = false
             displayCard()

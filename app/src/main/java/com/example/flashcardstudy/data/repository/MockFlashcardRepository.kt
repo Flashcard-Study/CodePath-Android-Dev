@@ -89,6 +89,12 @@ class MockFlashcardRepository : FlashcardRepository {
         return true
     }
 
+    override suspend fun importDeckWithCards(deck: Deck, cards: List<Flashcard>): Boolean {
+        decks.add(deck)
+        flashcards.addAll(cards)
+        return true
+    }
+
     override suspend fun getFlashcardsForDeck(deckId: String): List<Flashcard> {
         delay(CARDS_DELAY_MS)
         return flashcards.filter { it.deckId == deckId }
