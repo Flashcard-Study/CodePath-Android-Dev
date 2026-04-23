@@ -167,11 +167,6 @@ class StudyFragment : Fragment(), SensorEventListener {
             Log.d("StudyFragment", "Deck shuffled by shake")
         }
     }
-
-    fun loadDeck(deckId: String) {
-        viewModel.loadDeckFlashcards(deckId)
-    }
-
     companion object {
         private const val ARG_DECK_ID = "deck_id"
         private const val SHAKE_THRESHOLD = 8f

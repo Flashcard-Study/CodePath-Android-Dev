@@ -97,11 +97,6 @@ class MainActivity : AppCompatActivity() {
         suppressNavListener = false
     }
 
-    fun openDeckDetail() {
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.main_frame_layout, DeckDetailFragment()).addToBackStack(null).commit()
-    }
-
     fun openDeckDetail(deckId: String, deckName: String, deckColor: String = "#6C63FF") {
         val fragment = DeckDetailFragment.newInstance(deckId, deckName, deckColor)
         supportFragmentManager.beginTransaction()

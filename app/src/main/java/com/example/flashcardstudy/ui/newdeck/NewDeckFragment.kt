@@ -9,18 +9,22 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
 import android.view.View
+import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import com.example.flashcardstudy.Deck
 import com.example.flashcardstudy.Flashcard
+import com.example.flashcardstudy.Deck
 import com.example.flashcardstudy.R
+import com.example.flashcardstudy.data.gemini.GeminiFlashcardGenerator
 import com.example.flashcardstudy.data.repository.RepositoryProvider
 import com.example.flashcardstudy.data.transfer.DeckTransferException
 import com.example.flashcardstudy.data.transfer.DeckTransferParser
+import com.example.flashcardstudy.util.NetworkUtils
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.materialswitch.MaterialSwitch
@@ -67,6 +71,7 @@ class NewDeckFragment : Fragment(R.layout.fragment_new_deck) {
         val etDeckName = view.findViewById<TextInputEditText>(R.id.etDeckName)
         val btnCreate = view.findViewById<MaterialButton>(R.id.btnCreateDeck)
         val btnImport = view.findViewById<MaterialButton>(R.id.btnImportDeck)
+        val btnImportAi = view.findViewById<MaterialButton>(R.id.btnImportAiDeck)
 
         switchPublic.isChecked = prefs.getBoolean("is_public", false)
         tvLabel.text = if (switchPublic.isChecked) "Public deck" else "Private deck"
@@ -113,6 +118,14 @@ class NewDeckFragment : Fragment(R.layout.fragment_new_deck) {
 
         btnImport.setOnClickListener {
             importDeckLauncher.launch(arrayOf("application/json", "text/plain"))
+        }
+
+        btnImportAi.setOnClickListener {
+            showAiImportDialog(
+                etDeckName.text?.toString()?.trim().orEmpty(),
+                switchPublic.isChecked,
+                btnImportAi
+            )
         }
     }
 
@@ -255,6 +268,119 @@ class NewDeckFragment : Fragment(R.layout.fragment_new_deck) {
                 ).show()
             }
         }
+    }
+
+    private fun showAiImportDialog(
+        existingDeckName: String,
+        isPublic: Boolean,
+        actionButton: MaterialButton
+    ) {
+        val topicInput = EditText(requireContext()).apply {
+            hint = "e.g. Cellular respiration"
+            minHeight = (48 * resources.displayMetrics.density).toInt()
+        }
+        val countInput = EditText(requireContext()).apply {
+            hint = "Number of cards"
+            setText("10")
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER
+            minHeight = (48 * resources.displayMetrics.density).toInt()
+        }
+
+        val dialogContent = LinearLayout(requireContext()).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(48, 24, 48, 0)
+            addView(topicInput)
+            addView(countInput)
+        }
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Import with AI")
+            .setMessage("Generate a new deck from a topic and import it into your library.")
+            .setView(dialogContent)
+            .setPositiveButton("Generate") { dialog, _ ->
+                val topic = topicInput.text?.toString()?.trim().orEmpty()
+                val count = countInput.text?.toString()?.trim()?.toIntOrNull() ?: 10
+
+                if (topic.isBlank()) {
+                    Toast.makeText(
+                        requireContext(),
+                        "Enter a topic to generate a deck.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@setPositiveButton
+                }
+
+                if (!NetworkUtils.isNetworkAvailable(requireContext())) {
+                    Toast.makeText(
+                        requireContext(),
+                        "No network connection available.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@setPositiveButton
+                }
+
+                dialog.dismiss()
+
+                lifecycleScope.launch {
+                    actionButton.isEnabled = false
+                    val originalText = actionButton.text
+                    actionButton.text = "Generating..."
+                    val importedDeckId = UUID.randomUUID().toString()
+
+                    try {
+                        val generation = GeminiFlashcardGenerator.generateDeckGeneration(
+                            topic = topic,
+                            deckId = importedDeckId,
+                            count = count.coerceIn(1, 25)
+                        )
+                        val deckName = existingDeckName.ifBlank {
+                            generation.deckName.ifBlank { "AI: $topic" }
+                        }
+
+                        val deck = Deck(
+                            id = importedDeckId,
+                            name = deckName,
+                            cardCount = generation.flashcards.size,
+                            color = selectedColor,
+                            icon = selectedIcon,
+                            isPublic = isPublic
+                        )
+
+                        val imported = RepositoryProvider.flashcardRepository.importDeckWithCards(
+                            deck = deck,
+                            cards = generation.flashcards
+                        )
+
+                        if (imported) {
+                            Toast.makeText(
+                                requireContext(),
+                                "Imported \"$deckName\" with ${generation.flashcards.size} AI-generated cards.",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            (activity as? com.example.flashcardstudy.MainActivity)?.navigateToHome()
+                        } else {
+                            Toast.makeText(
+                                requireContext(),
+                                "Failed to import AI-generated deck.",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    } catch (error: Exception) {
+                        Toast.makeText(
+                            requireContext(),
+                            error.message ?: "Failed to generate deck.",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    } finally {
+                        actionButton.isEnabled = true
+                        actionButton.text = originalText
+                    }
+                }
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
     }
 
     private fun readTextFromUri(uri: Uri): String {

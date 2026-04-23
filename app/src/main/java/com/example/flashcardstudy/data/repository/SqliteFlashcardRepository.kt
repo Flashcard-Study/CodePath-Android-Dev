@@ -20,8 +20,16 @@ class SqliteFlashcardRepository(context: Context) : FlashcardRepository {
         dbHelper.insertDeck(deck)
     }
 
+    override suspend fun deleteDeck(deckId: String): Boolean = withContext(Dispatchers.IO) {
+        dbHelper.deleteDeck(deckId)
+    }
+
     override suspend fun addFlashcard(flashcard: Flashcard): Boolean = withContext(Dispatchers.IO) {
         dbHelper.insertFlashcard(flashcard)
+    }
+
+    override suspend fun deleteFlashcard(cardId: String): Boolean = withContext(Dispatchers.IO) {
+        dbHelper.deleteFlashcard(cardId)
     }
 
     override suspend fun importDeckWithCards(deck: Deck, cards: List<Flashcard>): Boolean =

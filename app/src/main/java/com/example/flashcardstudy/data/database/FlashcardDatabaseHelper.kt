@@ -171,6 +171,11 @@ class FlashcardDatabaseHelper(context: Context) :
         return db.insert(TABLE_DECKS, null, values) != -1L
     }
 
+    fun deleteDeck(deckId: String): Boolean {
+        val db = writableDatabase
+        return db.delete(TABLE_DECKS, "$COLUMN_DECK_ID = ?", arrayOf(deckId)) > 0
+    }
+
     fun updateDeckLastStudied(deckId: String) {
         val db = writableDatabase
         val values = ContentValues().apply {
@@ -224,6 +229,40 @@ class FlashcardDatabaseHelper(context: Context) :
             )
         }
         return inserted
+    }
+
+    fun deleteFlashcard(cardId: String): Boolean {
+        val db = writableDatabase
+        var deckId: String? = null
+        db.query(
+            TABLE_FLASHCARDS,
+            arrayOf(COLUMN_CARD_DECK_ID),
+            "$COLUMN_CARD_ID = ?",
+            arrayOf(cardId),
+            null,
+            null,
+            null
+        ).use { cursor ->
+            if (cursor.moveToFirst()) {
+                deckId = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CARD_DECK_ID))
+            }
+        }
+
+        val deleted = db.delete(TABLE_FLASHCARDS, "$COLUMN_CARD_ID = ?", arrayOf(cardId)) > 0
+        if (deleted && deckId != null) {
+            db.execSQL(
+                """
+                UPDATE $TABLE_DECKS
+                SET $COLUMN_DECK_CARD_COUNT = CASE
+                    WHEN $COLUMN_DECK_CARD_COUNT > 0 THEN $COLUMN_DECK_CARD_COUNT - 1
+                    ELSE 0
+                END
+                WHERE $COLUMN_DECK_ID = ?
+                """.trimIndent(),
+                arrayOf(deckId)
+            )
+        }
+        return deleted
     }
 
     fun importDeckWithCards(deck: Deck, cards: List<Flashcard>): Boolean {
