@@ -9,7 +9,8 @@ import com.example.flashcardstudy.Flashcard
 import com.example.flashcardstudy.R
 
 class DeckDetailAdapter(
-    private var cards: List<Flashcard>
+    private var cards: List<Flashcard>,
+    private val onCardLongClick: (Flashcard) -> Unit
 ) : RecyclerView.Adapter<DeckDetailAdapter.CardViewHolder>() {
 
     class CardViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -26,6 +27,10 @@ class DeckDetailAdapter(
         val card = cards[position]
         holder.question.text = card.question
         holder.answer.text = card.answer
+        holder.itemView.setOnLongClickListener {
+            onCardLongClick(card)
+            true
+        }
     }
 
     override fun getItemCount(): Int = cards.size

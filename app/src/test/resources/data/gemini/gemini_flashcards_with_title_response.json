@@ -1,0 +1,13 @@
+{
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "{\"deckName\":\"Cell Biology Basics\",\"flashcards\":[{\"question\":\"What is photosynthesis?\",\"answer\":\"Process plants use to convert light into energy\"},{\"question\":\"What do chloroplasts do?\",\"answer\":\"They capture light energy\"},{\"question\":\"Why is chlorophyll important?\",\"answer\":\"It absorbs light for photosynthesis\"},{\"question\":\"What gas do plants take in?\",\"answer\":\"Carbon dioxide\"},{\"question\":\"What gas do plants release?\",\"answer\":\"Oxygen\"}]}"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -31,6 +31,8 @@ class DeckDetailFragment : Fragment() {
     private lateinit var adapter: DeckDetailAdapter
     private var pendingExportJson: String? = null
     private var pendingExportFileName: String = "flashcard_deck.json"
+    private var currentDeckId: String? = null
+    private lateinit var emptyView: TextView
 
     private val saveDeckJsonLauncher =
         registerForActivityResult(ActivityResultContracts.CreateDocument(DeckTransferSchema.MIME_TYPE_JSON)) { uri ->
@@ -58,19 +60,21 @@ class DeckDetailFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val titleView = view.findViewById<TextView>(R.id.deckDetailTitle)
-        val emptyView = view.findViewById<TextView>(R.id.emptyState)
+        emptyView = view.findViewById(R.id.emptyState)
         val cardsView = view.findViewById<RecyclerView>(R.id.deckRecyclerView)
         val addCardButton = view.findViewById<Button>(R.id.addCardButton)
         val studyButton = view.findViewById<Button>(R.id.studyDeckButton)
         val exportButton = view.findViewById<Button>(R.id.exportDeckButton)
 
         titleView.text = deckName ?: "Deck Detail"
-        adapter = DeckDetailAdapter(emptyList())
+        adapter = DeckDetailAdapter(emptyList()) { card ->
+            showDeleteCardDialog(card)
+        }
         cardsView.layoutManager = LinearLayoutManager(requireContext())
         cardsView.adapter = adapter
 
-        val currentDeckId = deckId
-        if (currentDeckId == null) {
+        currentDeckId = deckId
+        val deckIdValue = currentDeckId ?: run {
             emptyView.visibility = View.VISIBLE
             emptyView.text = "No deck selected"
             return
@@ -78,24 +82,47 @@ class DeckDetailFragment : Fragment() {
 
         addCardButton.setOnClickListener {
             (activity as? MainActivity)?.openAddCardForDeck(
-                deckId = currentDeckId,
+                deckId = deckIdValue,
                 deckName = deckName ?: "Deck",
                 deckColor = deckColor
             )
         }
 
         studyButton.setOnClickListener {
-            (activity as? MainActivity)?.openStudyWithDeck(currentDeckId)
+            (activity as? MainActivity)?.openStudyWithDeck(deckIdValue)
         }
         exportButton.setOnClickListener {
-            exportCurrentDeck(currentDeckId)
+            exportCurrentDeck(deckIdValue)
         }
 
+        loadCards(deckIdValue)
+    }
+
+    private fun loadCards(deckId: String) {
         lifecycleScope.launch {
-            val cards = RepositoryProvider.flashcardRepository.getFlashcardsForDeck(currentDeckId)
+            val cards = RepositoryProvider.flashcardRepository.getFlashcardsForDeck(deckId)
             adapter.submitCards(cards)
             emptyView.visibility = if (cards.isEmpty()) View.VISIBLE else View.GONE
         }
+    }
+
+    private fun showDeleteCardDialog(card: com.example.flashcardstudy.Flashcard) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Delete card?")
+            .setMessage("This will remove this flashcard from the deck.")
+            .setPositiveButton("Delete") { dialog, _ ->
+                dialog.dismiss()
+                lifecycleScope.launch {
+                    val deleted = RepositoryProvider.flashcardRepository.deleteFlashcard(card.id)
+                    if (deleted) {
+                        currentDeckId?.let { loadCards(it) }
+                    }
+                }
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
     }
 
     private fun exportCurrentDeck(deckId: String) {

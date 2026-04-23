@@ -13,7 +13,8 @@ import com.google.android.material.card.MaterialCardView
 
 class DeckAdapter(
     private var decks: List<Deck>,
-    private val onDeckClick: (Deck) -> Unit
+    private val onDeckClick: (Deck) -> Unit,
+    private val onDeckLongClick: (Deck) -> Unit
 ) : RecyclerView.Adapter<DeckAdapter.DeckViewHolder>() {
     class DeckViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val card: MaterialCardView = itemView as MaterialCardView
@@ -35,6 +36,10 @@ class DeckAdapter(
         holder.ribbon.setBackgroundColor(color)
         holder.card.setCardBackgroundColor(ColorUtils.blendARGB(Color.WHITE, color, 0.15f))
         holder.itemView.setOnClickListener { onDeckClick(deck) }
+        holder.itemView.setOnLongClickListener {
+            onDeckLongClick(deck)
+            true
+        }
     }
 
     override fun getItemCount() = decks.size
