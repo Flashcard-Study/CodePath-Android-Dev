@@ -4,4 +4,33 @@
     <string name="tab_new_deck">New Deck</string>
     <string name="tab_add_card">Add Card</string>
     <string name="tab_study">Study</string>
+    <string name="tab_calendar">Calendar</string>
+
+    <!-- Welcome -->
+    <string name="welcome_tagline">Build Decks, Track Your Progress.\nStudy Smarter.</string>
+    <string name="get_started">Get Started</string>
+
+    <!-- Calendar -->
+    <string name="calendar_study_history">Study History</string>
+    <string name="calendar_month_title">Month</string>
+    <string name="calendar_weekly_progress">Weekly Progress</string>
+    <string name="heatmap_less">Less</string>
+    <string name="heatmap_more">More</string>
+    <string name="day_sun">Sun</string>
+    <string name="day_mon">Mon</string>
+    <string name="day_tue">Tue</string>
+    <string name="day_wed">Wed</string>
+    <string name="day_thu">Thu</string>
+    <string name="day_fri">Fri</string>
+    <string name="day_sat">Sat</string>
+
+    <!-- Graph Labels -->
+    <string name="label_sun">S</string>
+    <string name="label_mon">M</string>
+    <string name="label_tue">T</string>
+    <string name="label_wed">W</string>
+    <string name="label_thu">T</string>
+    <string name="label_fri">F</string>
+    <string name="label_sat">S</string>
+
 </resources>

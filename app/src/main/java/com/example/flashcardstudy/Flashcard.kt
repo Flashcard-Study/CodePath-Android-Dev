@@ -1,0 +1,8 @@
+package com.example.flashcardstudy
+
+data class Flashcard(
+    val question: String,
+    val answer: String,
+    val id: String = "",
+    val deckId: String = ""
+)
