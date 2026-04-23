@@ -15,7 +15,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Deck Name"
+            android:text="DECK NAME"
             android:textSize="12sp"
             android:textAllCaps="true"
             android:letterSpacing="0.08"
@@ -32,7 +32,7 @@
             app:boxCornerRadiusTopEnd="12dp"
             app:boxCornerRadiusBottomStart="12dp"
             app:boxCornerRadiusBottomEnd="12dp"
-            android:layout_marginBottom="24dp">
+            android:layout_marginBottom="16dp">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etDeckName"
@@ -44,10 +44,78 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
+        <!-- AI Generation Section -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="#F0EEFF"
+            android:layout_marginBottom="24dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="✨ Auto-Generate with AI"
+                    android:textSize="14sp"
+                    android:textColor="#6C63FF"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilAiTopic"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Enter a topic (e.g. Photosynthesis)"
+                    app:boxCornerRadiusTopStart="10dp"
+                    app:boxCornerRadiusTopEnd="10dp"
+                    app:boxCornerRadiusBottomStart="10dp"
+                    app:boxCornerRadiusBottomEnd="10dp"
+                    app:boxBackgroundColor="#FFFFFF"
+                    android:layout_marginBottom="10dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etAiTopic"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:textColor="#1A1A1A" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnGenerate"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:text="Generate"
+                    android:textColor="#FFFFFF"
+                    android:backgroundTint="#6C63FF"
+                    app:cornerRadius="10dp" />
+
+                <ProgressBar
+                    android:id="@+id/progressBar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="8dp"
+                    android:visibility="gone"
+                    android:indeterminateTint="#6C63FF" />
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Color"
+            android:text="COLOR"
             android:textSize="12sp"
             android:textAllCaps="true"
             android:letterSpacing="0.08"
@@ -73,7 +141,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Icon"
+            android:text="ICON"
             android:textSize="12sp"
             android:textAllCaps="true"
             android:letterSpacing="0.08"
@@ -99,7 +167,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Visibility"
+            android:text="VISIBILITY"
             android:textSize="12sp"
             android:textAllCaps="true"
             android:letterSpacing="0.08"
