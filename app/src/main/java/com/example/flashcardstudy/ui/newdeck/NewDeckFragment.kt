@@ -4,21 +4,27 @@ import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.Gravity
 import android.view.View
+import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.example.flashcardstudy.R
+import com.example.flashcardstudy.data.gemini.GeminiFlashcardGenerator
+import com.example.flashcardstudy.util.NetworkUtils
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import kotlinx.coroutines.launch
+import java.util.UUID
 
 class NewDeckFragment : Fragment(R.layout.fragment_new_deck) {
 
@@ -42,7 +48,6 @@ class NewDeckFragment : Fragment(R.layout.fragment_new_deck) {
         val etDeckName = view.findViewById<TextInputEditText>(R.id.etDeckName)
         val btnCreate = view.findViewById<MaterialButton>(R.id.btnCreateDeck)
         val btnGenerate = view.findViewById<MaterialButton>(R.id.btnGenerate)
-        val etAiTopic = view.findViewById<TextInputEditText>(R.id.etAiTopic)
         val progressBar = view.findViewById<ProgressBar>(R.id.progressBar)
 
         switchPublic.setOnCheckedChangeListener { _, isChecked ->
@@ -51,27 +56,7 @@ class NewDeckFragment : Fragment(R.layout.fragment_new_deck) {
         }
 
         btnGenerate.setOnClickListener {
-            val topic = etAiTopic.text?.toString()?.trim()
-            if (topic.isNullOrEmpty()) {
-                Snackbar.make(view, "Please enter a topic to generate", Snackbar.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            btnGenerate.isEnabled = false
-            progressBar.visibility = View.VISIBLE
-
-            Handler(Looper.getMainLooper()).postDelayed({
-                progressBar.visibility = View.GONE
-                btnGenerate.isEnabled = true
-
-                val success = (0..1).random() == 1
-                if (success) {
-                    etDeckName.setText(topic)
-                    Snackbar.make(view, "Deck generated for \"$topic\"!", Snackbar.LENGTH_SHORT).show()
-                } else {
-                    Snackbar.make(view, "Failed to generate. Please try again.", Snackbar.LENGTH_SHORT).show()
-                }
-            }, 2000)
+            showGenerateWithAiDialog(etDeckName, btnGenerate, progressBar, view)
         }
 
         btnCreate.setOnClickListener {
@@ -83,6 +68,88 @@ class NewDeckFragment : Fragment(R.layout.fragment_new_deck) {
                 Snackbar.make(view, "\"$name\" deck created!", Snackbar.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun showGenerateWithAiDialog(
+        etDeckName: TextInputEditText,
+        btnGenerate: MaterialButton,
+        progressBar: ProgressBar,
+        view: View
+    ) {
+        val topicInput = EditText(requireContext()).apply {
+            hint = "e.g. Cellular respiration"
+            minHeight = (48 * resources.displayMetrics.density).toInt()
+        }
+        val countInput = EditText(requireContext()).apply {
+            hint = "Number of cards"
+            setText("5")
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER
+            minHeight = (48 * resources.displayMetrics.density).toInt()
+        }
+        val useDeckContextSwitch = MaterialSwitch(requireContext()).apply {
+            isChecked = false
+        }
+        val useDeckContextLabel = TextView(requireContext()).apply {
+            text = "Use deck context"
+            textSize = 16f
+        }
+        val contextRow = LinearLayout(requireContext()).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            addView(useDeckContextLabel, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
+            addView(useDeckContextSwitch)
+        }
+        val dialogContent = LinearLayout(requireContext()).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(48, 24, 48, 0)
+            addView(topicInput)
+            addView(countInput)
+            addView(contextRow)
+        }
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Generate with AI")
+            .setMessage("Generate a deck name and flashcards for a topic.")
+            .setView(dialogContent)
+            .setPositiveButton("Generate") { dialog, _ ->
+                val topic = topicInput.text?.toString()?.trim().orEmpty()
+                val count = countInput.text?.toString()?.trim()?.toIntOrNull() ?: 5
+
+                if (topic.isBlank()) {
+                    Toast.makeText(requireContext(), "Enter a topic to generate cards.", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
+                if (!NetworkUtils.isNetworkAvailable(requireContext())) {
+                    Toast.makeText(requireContext(), "No network connection available.", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
+                dialog.dismiss()
+                btnGenerate.isEnabled = false
+                progressBar.visibility = View.VISIBLE
+
+                viewLifecycleOwner.lifecycleScope.launch {
+                    try {
+                        val deckId = UUID.randomUUID().toString()
+                        val result = GeminiFlashcardGenerator.generateDeckGeneration(
+                            topic = topic,
+                            deckId = deckId,
+                            count = count.coerceIn(1, 25)
+                        )
+                        progressBar.visibility = View.GONE
+                        btnGenerate.isEnabled = true
+                        etDeckName.setText(result.deckName)
+                        Snackbar.make(view, "Generated ${result.flashcards.size} flashcards for \"${result.deckName}\"!", Snackbar.LENGTH_LONG).show()
+                    } catch (e: Exception) {
+                        progressBar.visibility = View.GONE
+                        btnGenerate.isEnabled = true
+                        Snackbar.make(view, e.message ?: "Failed to generate.", Snackbar.LENGTH_LONG).show()
+                    }
+                }
+            }
+            .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
+            .show()
     }
 
     private fun setupColorPicker(view: View) {
