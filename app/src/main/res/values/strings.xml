@@ -24,6 +24,15 @@
     <string name="day_fri">Fri</string>
     <string name="day_sat">Sat</string>
 
+    <string name="calendar_filter_month">Month</string>
+    <string name="calendar_filter_deck">Deck</string>
+    <string name="calendar_all_decks">All Decks</string>
+    <string name="calendar_no_sessions">No sessions</string>
+    <string name="calendar_one_session">1 session</string>
+    <string name="calendar_sessions">%1$d sessions</string>
+    <string name="calendar_day_sessions">%1$s, %2$s</string>
+    <string name="calendar_weekday_sessions">%1$s: %2$d sessions</string>
+
     <!-- Graph Labels -->
     <string name="label_sun">S</string>
     <string name="label_mon">M</string>
