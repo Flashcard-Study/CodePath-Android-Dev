@@ -230,18 +230,16 @@
                             android:textColor="@color/sf_ink"
                             android:textSize="12sp" />
 
-                        <com.google.android.material.button.MaterialButton
+                        <ImageButton
                             android:id="@+id/generateCountMinus"
                             android:layout_width="34dp"
                             android:layout_height="34dp"
+                            android:background="@drawable/bg_round_999"
                             android:backgroundTint="@color/sf_ink"
-                            android:insetTop="0dp"
-                            android:insetBottom="0dp"
-                            android:minWidth="0dp"
-                            android:text="-"
-                            android:textAllCaps="false"
-                            android:textColor="@color/white"
-                            app:cornerRadius="17dp" />
+                            android:padding="8dp"
+                            android:scaleType="centerInside"
+                            android:src="@drawable/ic_minus"
+                            android:tint="@android:color/white" />
 
                         <TextView
                             android:id="@+id/generateCountValue"
@@ -253,18 +251,16 @@
                             android:textSize="14sp"
                             android:textStyle="bold" />
 
-                        <com.google.android.material.button.MaterialButton
+                        <ImageButton
                             android:id="@+id/generateCountPlus"
                             android:layout_width="34dp"
                             android:layout_height="34dp"
+                            android:background="@drawable/bg_round_999"
                             android:backgroundTint="@color/sf_ink"
-                            android:insetTop="0dp"
-                            android:insetBottom="0dp"
-                            android:minWidth="0dp"
-                            android:text="+"
-                            android:textAllCaps="false"
-                            android:textColor="@color/white"
-                            app:cornerRadius="17dp" />
+                            android:padding="8dp"
+                            android:scaleType="centerInside"
+                            android:src="@drawable/ic_plus"
+                            android:tint="@android:color/white" />
                     </LinearLayout>
 
                     <com.google.android.material.button.MaterialButton

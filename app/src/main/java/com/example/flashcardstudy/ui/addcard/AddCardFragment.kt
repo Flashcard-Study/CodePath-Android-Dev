@@ -34,6 +34,7 @@ class AddCardFragment : Fragment(R.layout.fragment_add_card) {
     private val aiSuggestions = mutableListOf<AiSuggestion>()
     private val acceptedSuggestionIds = mutableSetOf<Int>()
     private var generateCount = 8
+    private var isAiPanelExpanded = false
     private val prefs by lazy {
         requireActivity().getSharedPreferences("add_card_prefs", Context.MODE_PRIVATE)
     }
@@ -43,6 +44,12 @@ class AddCardFragment : Fragment(R.layout.fragment_add_card) {
         deckId = arguments?.getString(ARG_DECK_ID)
         deckName = arguments?.getString(ARG_DECK_NAME)
         deckColor = arguments?.getString(ARG_DECK_COLOR)
+        isAiPanelExpanded = savedInstanceState?.getBoolean(KEY_AI_PANEL_EXPANDED, false) ?: false
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putBoolean(KEY_AI_PANEL_EXPANDED, isAiPanelExpanded)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -60,13 +67,14 @@ class AddCardFragment : Fragment(R.layout.fragment_add_card) {
         val aiPanelContent = view.findViewById<LinearLayout>(R.id.aiPanelContent)
         val aiTopicInput = view.findViewById<EditText>(R.id.aiTopicInput)
         val generateAiButton = view.findViewById<MaterialButton>(R.id.buttonGenerateAi)
-        val generateCountMinus = view.findViewById<MaterialButton>(R.id.generateCountMinus)
-        val generateCountPlus = view.findViewById<MaterialButton>(R.id.generateCountPlus)
+        val generateCountMinus = view.findViewById<ImageButton>(R.id.generateCountMinus)
+        val generateCountPlus = view.findViewById<ImageButton>(R.id.generateCountPlus)
         val generateCountValue = view.findViewById<TextView>(R.id.generateCountValue)
         val aiAcceptedCount = view.findViewById<TextView>(R.id.aiAcceptedCount)
         val aiSuggestionsContainer = view.findViewById<LinearLayout>(R.id.aiSuggestionsContainer)
         generateCount = prefs.getInt("seed_count", 8).coerceIn(1, 25)
         aiTopicInput.setText(prefs.getString("seed_prompt", ""))
+        aiPanelContent.visibility = if (isAiPanelExpanded) View.VISIBLE else View.GONE
 
         val currentDeckId = deckId
         val currentDeckName = deckName
@@ -91,8 +99,8 @@ class AddCardFragment : Fragment(R.layout.fragment_add_card) {
         }
 
         aiPanelHeader.setOnClickListener {
-            aiPanelContent.visibility =
-                if (aiPanelContent.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+            isAiPanelExpanded = !isAiPanelExpanded
+            aiPanelContent.visibility = if (isAiPanelExpanded) View.VISIBLE else View.GONE
         }
 
         generateCountMinus.setOnClickListener {
@@ -172,7 +180,7 @@ class AddCardFragment : Fragment(R.layout.fragment_add_card) {
             }
         }
 
-        saveButton.setOnClickListener {
+        fun saveEntries(keepOpenForAnother: Boolean) {
             val front = frontInput.text.toString().trim()
             val back = backInput.text.toString().trim()
             val accepted = aiSuggestions.filter { acceptedSuggestionIds.contains(it.id) }
@@ -192,7 +200,7 @@ class AddCardFragment : Fragment(R.layout.fragment_add_card) {
                     "Add card content or accept AI suggestions.",
                     Toast.LENGTH_SHORT
                 ).show()
-                return@setOnClickListener
+                return
             }
 
             if (currentDeckId == null) {
@@ -201,7 +209,7 @@ class AddCardFragment : Fragment(R.layout.fragment_add_card) {
                     "No deck selected. Open a deck first.",
                     Toast.LENGTH_SHORT
                 ).show()
-                return@setOnClickListener
+                return
             }
 
             val targetDeckId = currentDeckId
@@ -231,6 +239,9 @@ class AddCardFragment : Fragment(R.layout.fragment_add_card) {
                         "$savedCount card(s) saved to \"${currentDeckName ?: "deck"}\".",
                         Toast.LENGTH_SHORT
                     ).show()
+                    if (keepOpenForAnother) {
+                        frontInput.requestFocus()
+                    }
                 } else {
                     Toast.makeText(requireContext(), "Failed to save card.", Toast.LENGTH_SHORT)
                         .show()
@@ -238,10 +249,12 @@ class AddCardFragment : Fragment(R.layout.fragment_add_card) {
             }
         }
 
+        saveButton.setOnClickListener {
+            saveEntries(keepOpenForAnother = false)
+        }
+
         addAnotherButton.setOnClickListener {
-            frontInput.text.clear()
-            backInput.text.clear()
-            frontInput.requestFocus()
+            saveEntries(keepOpenForAnother = true)
         }
 
         updateSaveButtonLabel(saveButton)
@@ -371,6 +384,7 @@ class AddCardFragment : Fragment(R.layout.fragment_add_card) {
         private const val ARG_DECK_ID = "deck_id"
         private const val ARG_DECK_NAME = "deck_name"
         private const val ARG_DECK_COLOR = "deck_color"
+        private const val KEY_AI_PANEL_EXPANDED = "key_ai_panel_expanded"
 
         fun newInstance(
             deckId: String,

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="bottom_nav_inset_top_padding">6dp</dimen>
+    <dimen name="bottom_nav_inset_bottom_padding">8dp</dimen>
+    <dimen name="bottom_nav_icon_size">22dp</dimen>
+    <dimen name="bottom_nav_text_size">10sp</dimen>
+    <dimen name="bottom_nav_item_padding_top">6dp</dimen>
+    <dimen name="bottom_nav_item_padding_bottom">6dp</dimen>
+</resources>

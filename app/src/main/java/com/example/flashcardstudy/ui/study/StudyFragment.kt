@@ -53,6 +53,29 @@ class StudyFragment : Fragment(), SensorEventListener {
     private var isSwiping = false
     private var isSwipeAnimating = false
     private var hasRecordedSessionForOpen = false
+    private var currentDeckId: String? = null
+    private var restoredDeckId: String? = null
+    private var restoredIndex: Int? = null
+    private var restoredShowAnswer = false
+    private var pendingStateRestore = false
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        restoredDeckId = savedInstanceState?.getString(KEY_DECK_ID)
+        restoredIndex = savedInstanceState?.getInt(KEY_CURRENT_INDEX)
+        restoredShowAnswer = savedInstanceState?.getBoolean(KEY_SHOW_ANSWER, false) ?: false
+        hasRecordedSessionForOpen =
+            savedInstanceState?.getBoolean(KEY_RECORDED_SESSION, false) ?: false
+        pendingStateRestore = savedInstanceState != null
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString(KEY_DECK_ID, currentDeckId)
+        outState.putInt(KEY_CURRENT_INDEX, currentIndex)
+        outState.putBoolean(KEY_SHOW_ANSWER, showAnswer)
+        outState.putBoolean(KEY_RECORDED_SESSION, hasRecordedSessionForOpen)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -86,7 +109,8 @@ class StudyFragment : Fragment(), SensorEventListener {
         setupClickListeners()
         setupSwipeGesture()
 
-        arguments?.getString(ARG_DECK_ID)?.let { deckId ->
+        currentDeckId = arguments?.getString(ARG_DECK_ID) ?: restoredDeckId
+        currentDeckId?.let { deckId ->
             Log.d("StudyFragment", "Loading deck from arguments: $deckId")
             viewModel.loadDeckFlashcards(deckId)
         } ?: run {
@@ -100,7 +124,15 @@ class StudyFragment : Fragment(), SensorEventListener {
         viewModel.flashcards.observe(viewLifecycleOwner) { cards ->
             flashcards = cards.toMutableList()
             if (cards.isNotEmpty()) {
-                currentIndex = 0
+                val shouldRestoreFromRotation =
+                    pendingStateRestore && restoredDeckId != null && restoredDeckId == currentDeckId
+                currentIndex = if (shouldRestoreFromRotation) {
+                    (restoredIndex ?: 0).coerceIn(0, cards.lastIndex)
+                } else {
+                    0
+                }
+                showAnswer = if (shouldRestoreFromRotation) restoredShowAnswer else false
+                pendingStateRestore = false
                 if (!hasRecordedSessionForOpen) {
                     viewModel.recordSession(cards.first().id)
                     hasRecordedSessionForOpen = true
@@ -309,6 +341,10 @@ class StudyFragment : Fragment(), SensorEventListener {
 
     companion object {
         private const val ARG_DECK_ID = "deck_id"
+        private const val KEY_DECK_ID = "key_deck_id"
+        private const val KEY_CURRENT_INDEX = "key_current_index"
+        private const val KEY_SHOW_ANSWER = "key_show_answer"
+        private const val KEY_RECORDED_SESSION = "key_recorded_session"
         private const val SHAKE_THRESHOLD = 8f
         private const val SHAKE_COOLDOWN_MS = 1000L
         private const val SWIPE_THRESHOLD = 90f
