@@ -31,8 +31,8 @@ A focused flashcard app with study scheduling, progress tracking, a cram mode fo
 
 **Required Features**
 
-1. [ ] User can create a "New Deck" by entering a name, selecting a color, choosing an icon, and toggling private/public visibility.
-2. [ ] User can add a new card to a deck by entering "Front" and "Back" text, with options to "Save" or "Add Another card".
+1. [x] User can create a "New Deck" by entering a name, selecting a color, choosing an icon, and toggling private/public visibility.
+2. [x] User can add a new card to a deck by entering "Front" and "Back" text, with options to "Save" or "Add Another card".
 3. [x] User can tap a card to flip it over and reveal the back text (static/local study list).
 4. [x]  User can grade their knowledge of a card after flipping it by selecting "Still learning" or "Got it" (local-only behavior).
 5. [x] User can view a "Study History" screen featuring a monthly calendar grid.

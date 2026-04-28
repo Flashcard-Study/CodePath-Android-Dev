@@ -1,20 +1,57 @@
 <resources>
-    <!-- Base application theme. -->
+
     <style name="Base.Theme.FlashcardStudy" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">@color/sf_accent</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSecondary">@color/sf_accent_2</item>
+        <item name="colorSurface">@color/sf_surface</item>
+        <item name="colorOnSurface">@color/sf_ink</item>
+        <item name="colorSurfaceVariant">@color/sf_bg_2</item>
+        <item name="colorOnSurfaceVariant">@color/sf_muted</item>
+        <item name="colorOutlineVariant">@color/sf_line</item>
+        <item name="android:colorBackground">@color/sf_bg</item>
+        <item name="android:windowBackground">@color/sf_bg</item>
+        <item name="android:fontFamily">sans-serif</item>
     </style>
 
     <style name="Theme.FlashcardStudy" parent="Base.Theme.FlashcardStudy" />
+
+    <!-- Tab indicator bar -->
+    <style name="TabIndicator">
+        <item name="android:layout_width">24dp</item>
+        <item name="android:layout_height">3dp</item>
+        <item name="android:background">@drawable/bg_tab_indicator</item>
+    </style>
+
+    <!-- Section heading - serif style -->
+    <style name="TextAppearance.SF.Heading" parent="TextAppearance.Material3.HeadlineLarge">
+        <item name="android:textSize">38sp</item>
+        <item name="android:fontFamily">serif</item>
+        <item name="android:letterSpacing">-0.03</item>
+    </style>
+
+    <style name="TextAppearance.SF.SectionTitle" parent="TextAppearance.Material3.TitleLarge">
+        <item name="android:textSize">22sp</item>
+        <item name="android:fontFamily">serif</item>
+        <item name="android:letterSpacing">-0.02</item>
+    </style>
+
+    <style name="TextAppearance.SF.Label" parent="TextAppearance.Material3.LabelSmall">
+        <item name="android:textSize">10sp</item>
+        <item name="android:letterSpacing">0.12</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textColor">@color/sf_muted</item>
+    </style>
 
     <style name="CalendarDayHeader">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">36dp</item>
         <item name="android:layout_weight">1</item>
         <item name="android:gravity">center</item>
-        <item name="android:textSize">12sp</item>
+        <item name="android:textSize">10sp</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:textColor">?attr/colorPrimary</item>
+        <item name="android:textColor">@color/sf_muted</item>
+        <item name="android:letterSpacing">0.06</item>
     </style>
 
     <style name="BarGraphLabel">
@@ -23,7 +60,6 @@
         <item name="android:layout_weight">1</item>
         <item name="android:gravity">center</item>
         <item name="android:textSize">10sp</item>
-        <item name="android:textColor">?attr/colorOnSurfaceVariant</item>
+        <item name="android:textColor">@color/sf_muted</item>
     </style>
-
 </resources>

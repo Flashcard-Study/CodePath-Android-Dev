@@ -379,30 +379,42 @@ class FlashcardDatabaseHelper(context: Context) :
             SELECT $COLUMN_PROGRESS_STATUS, COUNT(DISTINCT $COLUMN_PROGRESS_CARD_ID) as count
             FROM $TABLE_STUDY_PROGRESS
             WHERE $COLUMN_PROGRESS_DECK_ID = ?
+            AND $COLUMN_PROGRESS_STATUS IN (?, ?)
             AND $COLUMN_PROGRESS_ID IN (
                 SELECT MAX($COLUMN_PROGRESS_ID)
                 FROM $TABLE_STUDY_PROGRESS
                 WHERE $COLUMN_PROGRESS_DECK_ID = ?
+                AND $COLUMN_PROGRESS_STATUS IN (?, ?)
                 GROUP BY $COLUMN_PROGRESS_CARD_ID
             )
             GROUP BY $COLUMN_PROGRESS_STATUS
         """
 
-        val cursor = db.rawQuery(query, arrayOf(deckId, deckId))
+        val cursor = db.rawQuery(
+            query,
+            arrayOf(
+                deckId,
+                STATUS_GOT_IT,
+                STATUS_STILL_LEARNING,
+                deckId,
+                STATUS_GOT_IT,
+                STATUS_STILL_LEARNING
+            )
+        )
 
         var masteredCount = 0
-        var learningCount = 0
 
         cursor.use {
             while (it.moveToNext()) {
                 val status = it.getString(0)
                 val count = it.getInt(1)
                 when (status) {
-                    "got_it" -> masteredCount = count
-                    "still_learning" -> learningCount = count
+                    STATUS_GOT_IT -> masteredCount = count
                 }
             }
         }
+
+        val learningCount = (totalCards - masteredCount).coerceAtLeast(0)
 
         return StudyStats(
             totalCards = totalCards,
@@ -442,6 +454,10 @@ class FlashcardDatabaseHelper(context: Context) :
         const val COLUMN_PROGRESS_DECK_ID = "deck_id"
         const val COLUMN_PROGRESS_STATUS = "status"
         const val COLUMN_PROGRESS_TIMESTAMP = "timestamp"
+
+        const val STATUS_GOT_IT = "got_it"
+        const val STATUS_STILL_LEARNING = "still_learning"
+        const val STATUS_SESSION_STARTED = "session_started"
     }
 }
 

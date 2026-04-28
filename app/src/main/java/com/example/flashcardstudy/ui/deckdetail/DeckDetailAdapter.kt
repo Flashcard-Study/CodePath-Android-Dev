@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.flashcardstudy.Flashcard
 import com.example.flashcardstudy.R
@@ -36,7 +37,19 @@ class DeckDetailAdapter(
     override fun getItemCount(): Int = cards.size
 
     fun submitCards(newCards: List<Flashcard>) {
+        val oldCards = cards
         cards = newCards
-        notifyDataSetChanged()
+        DiffUtil.calculateDiff(object : DiffUtil.Callback() {
+            override fun getOldListSize(): Int = oldCards.size
+            override fun getNewListSize(): Int = newCards.size
+
+            override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                return oldCards[oldItemPosition].id == newCards[newItemPosition].id
+            }
+
+            override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                return oldCards[oldItemPosition] == newCards[newItemPosition]
+            }
+        }).dispatchUpdatesTo(this)
     }
 }

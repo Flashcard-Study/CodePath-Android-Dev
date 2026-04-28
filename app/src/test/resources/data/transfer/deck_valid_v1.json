@@ -8,7 +8,13 @@
     "isPublic": true
   },
   "cards": [
-    { "question": "What is ATP?", "answer": "Cell energy currency" },
-    { "question": "What is DNA?", "answer": "Genetic material" }
+    {
+      "question": "What is ATP?",
+      "answer": "Cell energy currency"
+    },
+    {
+      "question": "What is DNA?",
+      "answer": "Genetic material"
+    }
   ]
 }

@@ -4,4 +4,102 @@
     <color name="white">#FFFFFFFF</color>
     <color name="green">#009628</color>
     <color name="orange">#E86C00</color>
+
+    <!-- StudyFlow: Warm Cream palette -->
+    <color name="sf_bg">#F4EFE6</color>
+    <color name="sf_bg_2">#EBE4D6</color>
+    <color name="sf_bg_alt">#EBE4D6</color>
+    <color name="sf_surface">#FBF7EE</color>
+    <color name="sf_ink">#1A1D24</color>
+    <color name="sf_ink_2">#2C313D</color>
+    <color name="sf_ink_secondary">#2C313D</color>
+    <color name="sf_muted">#6E6A5F</color>
+    <color name="sf_line">#DCD4C2</color>
+
+    <!-- Accents -->
+    <color name="sf_accent">#FF5A1F</color>
+    <color name="sf_accent_2">#2E5BFF</color>
+    <color name="sf_accent_3">#0E8A5F</color>
+    <color name="sf_accent_4">#B53D2E</color>
+    <color name="sf_accent_5">#6B4FE8</color>
+    <color name="sf_accent_6">#C84B7C</color>
+    <color name="sf_blue">#2E5BFF</color>
+    <color name="sf_green">#0E8A5F</color>
+
+    <!-- Deck: Biology (Sage) -->
+    <color name="deck_bio_bg">#E8F0E2</color>
+    <color name="deck_bio_ink">#1F4A2A</color>
+    <color name="deck_bio_accent">#4A7C3A</color>
+    <color name="sf_deck_bio_bg">#E8F0E2</color>
+    <color name="sf_deck_bio_ink">#1F4A2A</color>
+    <color name="sf_deck_bio_accent">#4A7C3A</color>
+
+    <!-- Deck: Spanish (Amber) -->
+    <color name="deck_spa_bg">#FCE6CC</color>
+    <color name="deck_spa_ink">#5A3210</color>
+    <color name="deck_spa_accent">#C66B1F</color>
+    <color name="sf_deck_spa_bg">#FCE6CC</color>
+    <color name="sf_deck_spa_ink">#5A3210</color>
+    <color name="sf_deck_spa_accent">#C66B1F</color>
+
+    <!-- Deck: Calculus (Indigo) -->
+    <color name="deck_cal_bg">#E2E8F5</color>
+    <color name="deck_cal_ink">#1F2C5A</color>
+    <color name="deck_cal_accent">#2E5BFF</color>
+    <color name="sf_deck_cal_bg">#E2E8F5</color>
+    <color name="sf_deck_cal_ink">#1F2C5A</color>
+    <color name="sf_deck_cal_accent">#2E5BFF</color>
+
+    <!-- Deck: History (Brick) -->
+    <color name="deck_his_bg">#F5DDD0</color>
+    <color name="deck_his_ink">#5A2418</color>
+    <color name="deck_his_accent">#B53D2E</color>
+    <color name="sf_deck_his_bg">#F5DDD0</color>
+    <color name="sf_deck_his_ink">#5A2418</color>
+    <color name="sf_deck_his_accent">#B53D2E</color>
+
+    <!-- Deck: CS (Dark) -->
+    <color name="deck_cs_bg">#1A1D24</color>
+    <color name="deck_cs_ink">#F4EFE6</color>
+    <color name="deck_cs_accent">#4ADBA0</color>
+
+    <!-- Deck: Neuroscience (Violet) -->
+    <color name="deck_neu_bg">#EADBF5</color>
+    <color name="deck_neu_ink">#3A1E5A</color>
+    <color name="deck_neu_accent">#6B4FE8</color>
+    <color name="sf_deck_neu_bg">#EADBF5</color>
+    <color name="sf_deck_neu_ink">#3A1E5A</color>
+    <color name="sf_deck_neu_accent">#6B4FE8</color>
+
+    <!-- Deck: Emerald -->
+    <color name="sf_deck_eme_bg">#DDEFE7</color>
+    <color name="sf_deck_eme_ink">#1C5A43</color>
+    <color name="sf_deck_eme_accent">#0E8A5F</color>
+
+    <!-- Deck: Rose -->
+    <color name="sf_deck_ros_bg">#F6E0EA</color>
+    <color name="sf_deck_ros_ink">#5E2340</color>
+    <color name="sf_deck_ros_accent">#C84B7C</color>
+
+    <!-- Deck: Gold -->
+    <color name="sf_deck_gld_bg">#F8E9C8</color>
+    <color name="sf_deck_gld_ink">#5B4212</color>
+    <color name="sf_deck_gld_accent">#D18A00</color>
+
+    <!-- Deck: Teal -->
+    <color name="sf_deck_tea_bg">#DDEEEF</color>
+    <color name="sf_deck_tea_ink">#174A52</color>
+    <color name="sf_deck_tea_accent">#0F7A8A</color>
+
+    <!-- Heat map (ARGB format: alpha then RGB) -->
+    <color name="heat_0">#0D000000</color>
+    <color name="heat_1">#2E2E5BFF</color>
+    <color name="heat_2">#612E5BFF</color>
+    <color name="heat_3">#942E5BFF</color>
+    <color name="heat_4">#D92E5BFF</color>
+
+    <!-- Tab bar -->
+    <color name="tab_inactive">#80F4EFE6</color>
+    <color name="tab_active">#F4EFE6</color>
+    <color name="sf_nav_unselected">#88F4EFE6</color>
 </resources>

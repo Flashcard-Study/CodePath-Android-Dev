@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.flashcardstudy.Deck
 import com.example.flashcardstudy.data.repository.RepositoryProvider
 import kotlinx.coroutines.launch
 
@@ -17,9 +16,6 @@ class HomeViewModel : ViewModel() {
     private val _isLoading = MutableLiveData(false)
     val isLoading: LiveData<Boolean> = _isLoading
 
-    private val _mostRecentDeck = MutableLiveData<Deck?>()
-    val mostRecentDeck: LiveData<Deck?> = _mostRecentDeck
-
     init {
         loadDecks()
     }
@@ -29,17 +25,20 @@ class HomeViewModel : ViewModel() {
             _isLoading.postValue(true)
             try {
                 val deckList = repository.getDecks()
-                _decks.postValue(deckList)
+                val uiDecks = deckList.map { dbDeck ->
+                    val stats = repository.getStudyStatsForDeck(dbDeck.id)
+                    val trackedCards = stats.masteredCards + stats.learningCards
+                    val masteryPercent = if (trackedCards > 0) {
+                        ((stats.masteredCards.toFloat() / trackedCards.toFloat()) * 100f).toInt()
+                    } else {
+                        null
+                    }
+                    Deck.fromDatabaseDeck(dbDeck, masteryPercent)
+                }
+                _decks.postValue(uiDecks)
             } finally {
                 _isLoading.postValue(false)
             }
-        }
-    }
-
-    fun getMostRecentDeck() {
-        viewModelScope.launch {
-            val deck = repository.getMostRecentlyStudiedDeck()
-            _mostRecentDeck.postValue(deck)
         }
     }
 }
