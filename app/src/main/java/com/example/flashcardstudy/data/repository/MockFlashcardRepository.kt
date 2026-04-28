@@ -84,8 +84,25 @@ class MockFlashcardRepository : FlashcardRepository {
         return true
     }
 
+    override suspend fun deleteDeck(deckId: String): Boolean {
+        decks.removeAll { it.id == deckId }
+        flashcards.removeAll { it.deckId == deckId }
+        return true
+    }
+
     override suspend fun addFlashcard(flashcard: Flashcard): Boolean {
         flashcards.add(flashcard)
+        return true
+    }
+
+    override suspend fun deleteFlashcard(cardId: String): Boolean {
+        flashcards.removeAll { it.id == cardId }
+        return true
+    }
+
+    override suspend fun importDeckWithCards(deck: Deck, cards: List<Flashcard>): Boolean {
+        decks.add(deck)
+        flashcards.addAll(cards)
         return true
     }
 

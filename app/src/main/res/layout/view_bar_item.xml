@@ -7,6 +7,16 @@
     android:orientation="vertical"
     android:paddingHorizontal="5dp">
 
+    <TextView
+        android:id="@+id/tv_bar_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="6dp"
+        android:text="0"
+        android:textColor="#B3F4EFE6"
+        android:textSize="10sp"
+        android:textStyle="bold" />
+
     <View
         android:id="@+id/v_bar"
         android:layout_width="match_parent"

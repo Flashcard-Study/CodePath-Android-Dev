@@ -1,48 +1,120 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/deckCard"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginBottom="10dp"
-    app:cardCornerRadius="18dp"
-    app:cardElevation="2dp">
+    android:layout_height="200dp"
+    app:cardCornerRadius="22dp"
+    app:cardElevation="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/deckCardLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent"
+        android:padding="18dp">
 
-        <View
-            android:id="@+id/deckRibbon"
-            android:layout_width="10dp"
-            android:layout_height="0dp"
-            app:layout_constraintBottom_toBottomOf="parent"
+        <!-- Icon container -->
+        <FrameLayout
+            android:id="@+id/deckIconFrame"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_tag_chip"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/deckRibbon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_nav_study"
+                app:tint="@color/white" />
+        </FrameLayout>
+
+        <!-- Mastery badge -->
+        <TextView
+            android:id="@+id/deckCardCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_tag_chip"
+            android:fontFamily="monospace"
+            android:paddingStart="8dp"
+            android:paddingTop="4dp"
+            android:paddingEnd="8dp"
+            android:paddingBottom="4dp"
+            android:textColor="@color/white"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:alpha="0.85"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <!-- Subtitle -->
+        <TextView
+            android:id="@+id/deckSubtitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
+            android:letterSpacing="0.1"
+            android:textAllCaps="true"
+            android:textSize="10sp"
+            android:alpha="0.75"
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toTopOf="@+id/deckName"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginBottom="4dp" />
+
+        <!-- Deck name -->
         <TextView
             android:id="@+id/deckName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="14dp"
-            android:layout_marginTop="16dp"
-            android:textAppearance="?attr/textAppearanceTitleMedium"
+            android:fontFamily="serif"
+            android:letterSpacing="-0.02"
+            android:lineSpacingMultiplier="1.05"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@+id/deckProgressBar"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/deckRibbon"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginBottom="12dp" />
+
+        <!-- Progress bar -->
+        <ProgressBar
+            android:id="@+id/deckProgressBar"
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="0dp"
+            android:layout_height="4dp"
+            android:max="100"
+            android:progressBackgroundTint="#30000000"
+            android:progressTint="@color/white"
+            app:layout_constraintBottom_toTopOf="@+id/deckMetaText"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginBottom="8dp" />
 
         <TextView
-            android:id="@+id/deckCardCount"
-            android:layout_width="0dp"
+            android:id="@+id/deckMetaText"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="14dp"
-            android:layout_marginTop="2dp"
-            android:layout_marginBottom="16dp"
-            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:alpha="0.85"
+            android:fontFamily="sans-serif-medium"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <ImageView
+            android:id="@+id/deckPlayIcon"
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:alpha="0.85"
+            android:src="@drawable/ic_nav_study"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/deckRibbon"
-            app:layout_constraintTop_toBottomOf="@id/deckName" />
+            app:tint="@color/white" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-</com.google.android.material.card.MaterialCardView>
+</androidx.cardview.widget.CardView>

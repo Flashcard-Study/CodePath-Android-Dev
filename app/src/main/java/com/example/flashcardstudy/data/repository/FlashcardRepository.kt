@@ -8,7 +8,10 @@ import com.example.flashcardstudy.data.database.StudyStats
 interface FlashcardRepository {
     suspend fun getDecks(): List<Deck>
     suspend fun createDeck(deck: Deck): Boolean
+    suspend fun deleteDeck(deckId: String): Boolean
     suspend fun addFlashcard(flashcard: Flashcard): Boolean
+    suspend fun deleteFlashcard(cardId: String): Boolean
+    suspend fun importDeckWithCards(deck: Deck, cards: List<Flashcard>): Boolean
     suspend fun getFlashcardsForDeck(deckId: String): List<Flashcard>
     suspend fun recordStudyProgress(cardId: String, deckId: String, status: String)
     suspend fun getStudyProgressForDeck(deckId: String): List<StudyProgress>

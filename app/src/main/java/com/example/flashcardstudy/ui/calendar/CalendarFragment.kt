@@ -3,23 +3,48 @@ package com.example.flashcardstudy.ui.calendar
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
+import androidx.core.graphics.toColorInt
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.flashcardstudy.R
+import com.example.flashcardstudy.data.database.FlashcardDatabaseHelper
+import com.example.flashcardstudy.data.database.StudyProgress
+import com.example.flashcardstudy.data.repository.RepositoryProvider
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
 class CalendarFragment : Fragment() {
+    private val repository by lazy { RepositoryProvider.flashcardRepository }
+
+    private var currentMonthCells: List<String> = emptyList()
+    private var sessionCountsForMonth: Map<Int, Int> = emptyMap()
+    private var weeklySessionCounts: List<Int> = List(7) { 0 }
+    private val displayedMonth: Calendar = Calendar.getInstance().apply {
+        set(Calendar.DAY_OF_MONTH, 1)
+    }
+    private val monthFormatter by lazy { SimpleDateFormat("MMMM yyyy", Locale.getDefault()) }
+
+    private lateinit var tvActivityMapTitle: TextView
+    private lateinit var prevMonthButton: TextView
+    private lateinit var nextMonthButton: TextView
+    private lateinit var tvWeekTotal: TextView
+    private lateinit var tvStreakCount: TextView
+    private lateinit var calendarGrid: RecyclerView
+    private lateinit var heatmapLegend: LinearLayout
+    private lateinit var barGraph: LinearLayout
+    private lateinit var dayLabels: List<TextView>
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -28,41 +53,118 @@ class CalendarFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val today = Calendar.getInstance()
-        view.findViewById<TextView>(R.id.tv_month_title).text =
-            SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(today.time)
+        tvActivityMapTitle = view.findViewById(R.id.tv_activity_map_title)
+        prevMonthButton = view.findViewById(R.id.btn_prev_month)
+        nextMonthButton = view.findViewById(R.id.btn_next_month)
+        tvWeekTotal = view.findViewById(R.id.tv_week_total)
+        tvStreakCount = view.findViewById(R.id.tv_streak_count)
+        calendarGrid = view.findViewById(R.id.rv_calendar_grid)
+        heatmapLegend = view.findViewById(R.id.ll_heatmap_legend)
+        barGraph = view.findViewById(R.id.ll_bar_graph)
+        dayLabels = listOf(
+            view.findViewById(R.id.tv_label_sun),
+            view.findViewById(R.id.tv_label_mon),
+            view.findViewById(R.id.tv_label_tue),
+            view.findViewById(R.id.tv_label_wed),
+            view.findViewById(R.id.tv_label_thu),
+            view.findViewById(R.id.tv_label_fri),
+            view.findViewById(R.id.tv_label_sat)
+        )
+
+        displayedMonth.timeInMillis = Calendar.getInstance().timeInMillis
+        displayedMonth.set(Calendar.DAY_OF_MONTH, 1)
+        tvActivityMapTitle.text = monthFormatter.format(displayedMonth.time)
 
         val density = resources.displayMetrics.density
-        val primary = resolveAttr(android.R.attr.colorPrimary)
-        val onSurface = resolveAttr(com.google.android.material.R.attr.colorOnSurface)
-        val outlineVariant = resolveAttr(com.google.android.material.R.attr.colorOutlineVariant)
-        // Derive contrast color; avoids API-level constraints on colorOnPrimary
-        val onPrimary =
-            if (ColorUtils.calculateLuminance(primary) > 0.35) Color.BLACK else Color.WHITE
+        val primary = ContextCompat.getColor(requireContext(), R.color.sf_accent)
+        val outlineVariant = ContextCompat.getColor(requireContext(), R.color.sf_line)
 
-        val cells = buildMonthCells(today)
-        view.findViewById<RecyclerView>(R.id.rv_calendar_grid).apply {
-            layoutManager = GridLayoutManager(requireContext(), 7)
-            adapter = CalendarAdapter(
-                cells,
-                today.get(Calendar.DAY_OF_MONTH),
-                MOCK_SESSION_COUNTS,
-                primary,
-                onPrimary,
-                onSurface,
-                outlineVariant,
-                cornerRadius = 6 * density,
-                strokeWidth = maxOf(density.toInt(), 1)
-            )
-        }
+        calendarGrid.layoutManager = GridLayoutManager(requireContext(), 7)
+        currentMonthCells = buildMonthCells(displayedMonth)
+
+        prevMonthButton.setOnClickListener { shiftDisplayedMonth(-1) }
+        nextMonthButton.setOnClickListener { shiftDisplayedMonth(1) }
 
         setupHeatmapLegend(
-            view.findViewById(R.id.ll_heatmap_legend),
+            heatmapLegend,
             primary,
             outlineVariant,
             density
         )
-        setupBarGraph(view.findViewById(R.id.ll_bar_graph))
+
+        renderCalendar(displayedMonth, density)
+        setupBarGraph(barGraph, weeklySessionCounts)
+        loadCalendarData(displayedMonth, density)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val density = resources.displayMetrics.density
+        loadCalendarData(displayedMonth, density)
+    }
+
+    private fun loadCalendarData(monthAnchor: Calendar, density: Float) {
+        lifecycleScope.launch {
+            val selectedMonth = (monthAnchor.clone() as Calendar).apply {
+                set(Calendar.DAY_OF_MONTH, 1)
+            }
+            tvActivityMapTitle.text = monthFormatter.format(selectedMonth.time)
+            currentMonthCells = buildMonthCells(selectedMonth)
+
+            val allProgress = mutableListOf<StudyProgress>()
+            repository.getDecks().forEach { deck ->
+                allProgress += repository.getStudyProgressForDeck(deck.id)
+            }
+            val sessionProgress =
+                allProgress.filter { it.status == FlashcardDatabaseHelper.STATUS_SESSION_STARTED }
+            val today = Calendar.getInstance()
+
+            sessionCountsForMonth = aggregateMonthSessionCounts(sessionProgress, selectedMonth)
+            weeklySessionCounts = aggregateWeeklySessions(sessionProgress, today)
+            val weekTotal = weeklySessionCounts.sum()
+            val streak = calculateStreak(sessionProgress, today)
+
+            tvWeekTotal.text = "$weekTotal times studied"
+            tvStreakCount.text = streak.toString()
+
+            renderCalendar(selectedMonth, density)
+            setupBarGraph(barGraph, weeklySessionCounts)
+        }
+    }
+
+    private fun renderCalendar(monthAnchor: Calendar, density: Float) {
+        val primary = ContextCompat.getColor(requireContext(), R.color.sf_accent)
+        val onSurface = ContextCompat.getColor(requireContext(), R.color.sf_ink)
+        val outlineVariant = ContextCompat.getColor(requireContext(), R.color.sf_line)
+        val onPrimary = Color.WHITE
+        val today = Calendar.getInstance()
+        val highlightedDay = if (
+            today.get(Calendar.YEAR) == monthAnchor.get(Calendar.YEAR) &&
+            today.get(Calendar.MONTH) == monthAnchor.get(Calendar.MONTH)
+        ) {
+            today.get(Calendar.DAY_OF_MONTH)
+        } else {
+            -1
+        }
+
+        calendarGrid.adapter = CalendarAdapter(
+            currentMonthCells,
+            highlightedDay,
+            sessionCountsForMonth,
+            primary,
+            onPrimary,
+            onSurface,
+            outlineVariant,
+            cornerRadius = 6 * density,
+            strokeWidth = maxOf(density.toInt(), 1)
+        )
+    }
+
+    private fun shiftDisplayedMonth(delta: Int) {
+        displayedMonth.add(Calendar.MONTH, delta)
+        displayedMonth.set(Calendar.DAY_OF_MONTH, 1)
+        val density = resources.displayMetrics.density
+        loadCalendarData(displayedMonth, density)
     }
 
     private fun buildMonthCells(calendar: Calendar): List<String> {
@@ -86,79 +188,146 @@ class CalendarFragment : Fragment() {
         val size = (20 * density).toInt()
         val gap = (4 * density).toInt()
         val radius = 4 * density
+        container.removeAllViews()
         listOf(0, 64, 128, 191, 255).forEach { alpha ->
             container.addView(View(requireContext()).apply {
                 layoutParams = LinearLayout.LayoutParams(size, size).also { it.marginEnd = gap }
                 background = GradientDrawable().apply {
                     cornerRadius = radius
                     if (alpha == 0) {
-                        setColor(Color.TRANSPARENT); setStroke(maxOf(density.toInt(), 1), outline)
-                    } else setColor(ColorUtils.setAlphaComponent(primary, alpha))
+                        setColor(Color.TRANSPARENT)
+                        setStroke(maxOf(density.toInt(), 1), outline)
+                    } else {
+                        setColor(ColorUtils.setAlphaComponent(primary, alpha))
+                    }
                 }
             })
         }
     }
 
-    private fun setupBarGraph(container: LinearLayout) {
+    private fun setupBarGraph(container: LinearLayout, sessionCounts: List<Int>) {
         container.post {
-            val maxHeight = container.height
-            WEEKLY_PROGRESS.forEachIndexed { i, progress ->
-                val bar = container.getChildAt(i).findViewById<View>(R.id.v_bar)
-                bar.layoutParams =
-                    bar.layoutParams.also { it.height = (maxHeight * progress).toInt() }
+            val maxSessions = sessionCounts.maxOrNull()?.coerceAtLeast(1) ?: 1
+            val drawablePeak = ContextCompat.getColor(requireContext(), R.color.sf_accent)
+            val drawableDefault = "#38F4EFE6".toColorInt()
+            val labelPeak = ContextCompat.getColor(requireContext(), R.color.sf_accent)
+            val labelDefault = "#88F4EFE6".toColorInt()
+            val peakIndex = sessionCounts.indexOfFirst { it == maxSessions && it > 0 }
+
+            sessionCounts.forEachIndexed { index, sessions ->
+                val item = container.getChildAt(index)
+                val bar = item.findViewById<View>(R.id.v_bar)
+                val count = item.findViewById<TextView>(R.id.tv_bar_count)
+                val minBarHeight = (8 * resources.displayMetrics.density).toInt()
+                val availableHeight =
+                    container.height - count.height - (20 * resources.displayMetrics.density).toInt()
+                val normalized = sessions.toFloat() / maxSessions.toFloat()
+                val barHeight = (availableHeight * normalized).toInt().coerceAtLeast(minBarHeight)
+
+                bar.layoutParams = bar.layoutParams.also { it.height = barHeight }
+                count.text = sessions.toString()
+                count.alpha = if (sessions == 0) 0.45f else 1f
+
+                val isPeak = sessions == maxSessions && sessions > 0
+                val shape = GradientDrawable().apply {
+                    setColor(if (isPeak) drawablePeak else drawableDefault)
+                    cornerRadii = floatArrayOf(8f, 8f, 8f, 8f, 2f, 2f, 2f, 2f)
+                }
+                bar.background = shape
+            }
+
+            dayLabels.forEachIndexed { index, label ->
+                label.setTextColor(if (index == peakIndex) labelPeak else labelDefault)
             }
         }
     }
 
-    private fun resolveAttr(attr: Int): Int {
-        val tv = TypedValue()
-        requireContext().theme.resolveAttribute(attr, tv, true)
-        return tv.data
+    private fun aggregateMonthSessionCounts(
+        allProgress: List<StudyProgress>,
+        monthAnchor: Calendar
+    ): Map<Int, Int> {
+        val targetYear = monthAnchor.get(Calendar.YEAR)
+        val targetMonth = monthAnchor.get(Calendar.MONTH)
+        val dayCounts = mutableMapOf<Int, Int>()
+
+        allProgress.forEach { progress ->
+            val cal = Calendar.getInstance().apply { timeInMillis = progress.timestamp }
+            if (cal.get(Calendar.YEAR) == targetYear && cal.get(Calendar.MONTH) == targetMonth) {
+                val day = cal.get(Calendar.DAY_OF_MONTH)
+                dayCounts[day] = (dayCounts[day] ?: 0) + 1
+            }
+        }
+        return dayCounts
     }
 
-    companion object {
-        // Mock weekly study percentages (Sun–Sat, 0.0–1.0)
-        private val WEEKLY_PROGRESS = listOf(0.4f, 0.8f, 0.6f, 0.9f, 0.3f, 0.7f, 0.5f)
+    private fun aggregateWeeklySessions(
+        allProgress: List<StudyProgress>,
+        today: Calendar
+    ): List<Int> {
+        val weekStart = (today.clone() as Calendar).apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+            while (get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
+                add(Calendar.DAY_OF_MONTH, -1)
+            }
+        }
 
-        // Mock session counts: day-of-month to sessions
-        private val MOCK_SESSION_COUNTS: Map<Int, Int> = mapOf(
-            1 to 2,
-            2 to 1,
-            3 to 0,
-            4 to 3,
-            5 to 4,
-            6 to 2,
-            7 to 0,
-            8 to 1,
-            9 to 3,
-            10 to 2,
-            11 to 4,
-            12 to 1,
-            13 to 0,
-            14 to 2,
-            15 to 3,
-            16 to 4,
-            17 to 2,
-            18 to 1,
-            19 to 3,
-            20 to 0,
-            21 to 4,
-            22 to 2,
-            23 to 1,
-            24 to 3,
-            25 to 0,
-            26 to 2,
-            27 to 4,
-            28 to 1,
-            29 to 3,
-            30 to 2
-        )
+        val dayKeys = (0..6).map { offset ->
+            (weekStart.clone() as Calendar).apply { add(Calendar.DAY_OF_MONTH, offset) }
+                .let { dayKey(it) }
+        }
+
+        val counts = MutableList(7) { 0 }
+        allProgress.forEach { progress ->
+            val key = dayKey(Calendar.getInstance().apply { timeInMillis = progress.timestamp })
+            val index = dayKeys.indexOf(key)
+            if (index >= 0) {
+                counts[index] = counts[index] + 1
+            }
+        }
+
+        return counts
+    }
+
+    private fun calculateStreak(allProgress: List<StudyProgress>, today: Calendar): Int {
+        if (allProgress.isEmpty()) return 0
+
+        val daysWithStudy = allProgress
+            .map { progress ->
+                dayKey(
+                    Calendar.getInstance().apply { timeInMillis = progress.timestamp })
+            }
+            .toSet()
+
+        var streak = 0
+        val cursor = (today.clone() as Calendar).apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+
+        while (daysWithStudy.contains(dayKey(cursor))) {
+            streak += 1
+            cursor.add(Calendar.DAY_OF_MONTH, -1)
+        }
+
+        return streak
+    }
+
+    private fun dayKey(calendar: Calendar): Int {
+        val y = calendar.get(Calendar.YEAR)
+        val m = calendar.get(Calendar.MONTH) + 1
+        val d = calendar.get(Calendar.DAY_OF_MONTH)
+        return y * 10000 + m * 100 + d
     }
 }
 
 class CalendarAdapter(
     private val cells: List<String>,
-    private val todayDay: Int,
+    private val highlightedDay: Int,
     private val sessionCounts: Map<Int, Int>,
     private val primaryColor: Int,
     private val onPrimaryColor: Int,
@@ -191,7 +360,7 @@ class CalendarAdapter(
         val drawable = GradientDrawable().apply { cornerRadius = this@CalendarAdapter.cornerRadius }
 
         when {
-            day == todayDay -> {
+            highlightedDay > 0 && day == highlightedDay -> {
                 drawable.setColor(primaryColor)
                 holder.tvDay.setTextColor(onPrimaryColor)
             }
@@ -203,7 +372,6 @@ class CalendarAdapter(
             }
 
             else -> {
-                // 1 session = 25% alpha … 4+ = 100%
                 val alpha = minOf(64 * sessions, 255)
                 drawable.setColor(ColorUtils.setAlphaComponent(primaryColor, alpha))
                 holder.tvDay.setTextColor(if (alpha >= 160) onPrimaryColor else onSurfaceColor)

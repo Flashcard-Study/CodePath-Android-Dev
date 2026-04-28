@@ -7,10 +7,12 @@ import android.database.sqlite.SQLiteOpenHelper
 import com.example.flashcardstudy.Deck
 import com.example.flashcardstudy.Flashcard
 
-class FlashcardDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
+class FlashcardDatabaseHelper(context: Context) :
+    SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     override fun onCreate(db: SQLiteDatabase) {
-        db.execSQL("""
+        db.execSQL(
+            """
             CREATE TABLE $TABLE_DECKS (
                 $COLUMN_DECK_ID TEXT PRIMARY KEY,
                 $COLUMN_DECK_NAME TEXT NOT NULL,
@@ -21,9 +23,11 @@ class FlashcardDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATA
                 $COLUMN_DECK_ICON TEXT DEFAULT '',
                 $COLUMN_DECK_IS_PUBLIC INTEGER DEFAULT 0
             )
-        """)
+        """
+        )
 
-        db.execSQL("""
+        db.execSQL(
+            """
             CREATE TABLE $TABLE_FLASHCARDS (
                 $COLUMN_CARD_ID TEXT PRIMARY KEY,
                 $COLUMN_CARD_DECK_ID TEXT NOT NULL,
@@ -31,9 +35,11 @@ class FlashcardDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATA
                 $COLUMN_CARD_ANSWER TEXT NOT NULL,
                 FOREIGN KEY($COLUMN_CARD_DECK_ID) REFERENCES $TABLE_DECKS($COLUMN_DECK_ID) ON DELETE CASCADE
             )
-        """)
+        """
+        )
 
-        db.execSQL("""
+        db.execSQL(
+            """
             CREATE TABLE $TABLE_STUDY_PROGRESS (
                 $COLUMN_PROGRESS_ID INTEGER PRIMARY KEY AUTOINCREMENT,
                 $COLUMN_PROGRESS_CARD_ID TEXT NOT NULL,
@@ -43,7 +49,8 @@ class FlashcardDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATA
                 FOREIGN KEY($COLUMN_PROGRESS_CARD_ID) REFERENCES $TABLE_FLASHCARDS($COLUMN_CARD_ID) ON DELETE CASCADE,
                 FOREIGN KEY($COLUMN_PROGRESS_DECK_ID) REFERENCES $TABLE_DECKS($COLUMN_DECK_ID) ON DELETE CASCADE
             )
-        """)
+        """
+        )
 
         insertSampleData(db)
     }
@@ -85,7 +92,11 @@ class FlashcardDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATA
             Triple("fc_bio_1", "What is the powerhouse of the cell?", "Mitochondria"),
             Triple("fc_bio_2", "Which molecule carries genetic information?", "DNA"),
             Triple("fc_bio_3", "What is the main function of red blood cells?", "Carrying oxygen"),
-            Triple("fc_bio_4", "What is the term for keeping internal conditions stable?", "Homeostasis"),
+            Triple(
+                "fc_bio_4",
+                "What is the term for keeping internal conditions stable?",
+                "Homeostasis"
+            ),
             Triple("fc_bio_5", "What is the largest organ in the human body?", "Skin")
         )
 
@@ -120,12 +131,12 @@ class FlashcardDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATA
         val decks = mutableListOf<Deck>()
         val db = readableDatabase
         val cursor = db.query(
-            TABLE_DECKS, 
-            null, 
-            null, 
-            null, 
-            null, 
-            null, 
+            TABLE_DECKS,
+            null,
+            null,
+            null,
+            null,
+            null,
             "$COLUMN_DECK_LAST_STUDIED DESC, $COLUMN_DECK_NAME ASC"
         )
 
@@ -158,6 +169,11 @@ class FlashcardDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATA
             put(COLUMN_DECK_IS_PUBLIC, if (deck.isPublic) 1 else 0)
         }
         return db.insert(TABLE_DECKS, null, values) != -1L
+    }
+
+    fun deleteDeck(deckId: String): Boolean {
+        val db = writableDatabase
+        return db.delete(TABLE_DECKS, "$COLUMN_DECK_ID = ?", arrayOf(deckId)) > 0
     }
 
     fun updateDeckLastStudied(deckId: String) {
@@ -213,6 +229,79 @@ class FlashcardDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATA
             )
         }
         return inserted
+    }
+
+    fun deleteFlashcard(cardId: String): Boolean {
+        val db = writableDatabase
+        var deckId: String? = null
+        db.query(
+            TABLE_FLASHCARDS,
+            arrayOf(COLUMN_CARD_DECK_ID),
+            "$COLUMN_CARD_ID = ?",
+            arrayOf(cardId),
+            null,
+            null,
+            null
+        ).use { cursor ->
+            if (cursor.moveToFirst()) {
+                deckId = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CARD_DECK_ID))
+            }
+        }
+
+        val deleted = db.delete(TABLE_FLASHCARDS, "$COLUMN_CARD_ID = ?", arrayOf(cardId)) > 0
+        if (deleted && deckId != null) {
+            db.execSQL(
+                """
+                UPDATE $TABLE_DECKS
+                SET $COLUMN_DECK_CARD_COUNT = CASE
+                    WHEN $COLUMN_DECK_CARD_COUNT > 0 THEN $COLUMN_DECK_CARD_COUNT - 1
+                    ELSE 0
+                END
+                WHERE $COLUMN_DECK_ID = ?
+                """.trimIndent(),
+                arrayOf(deckId)
+            )
+        }
+        return deleted
+    }
+
+    fun importDeckWithCards(deck: Deck, cards: List<Flashcard>): Boolean {
+        val db = writableDatabase
+        db.beginTransaction()
+        return try {
+            val deckValues = ContentValues().apply {
+                put(COLUMN_DECK_ID, deck.id)
+                put(COLUMN_DECK_NAME, deck.name)
+                put(COLUMN_DECK_SUBTITLE, deck.subtitle)
+                put(COLUMN_DECK_CARD_COUNT, cards.size)
+                put(COLUMN_DECK_COLOR, deck.color)
+                put(COLUMN_DECK_ICON, deck.icon)
+                put(COLUMN_DECK_IS_PUBLIC, if (deck.isPublic) 1 else 0)
+            }
+
+            val deckInserted = db.insert(TABLE_DECKS, null, deckValues) != -1L
+            if (!deckInserted) {
+                return false
+            }
+
+            cards.forEach { card ->
+                val cardValues = ContentValues().apply {
+                    put(COLUMN_CARD_ID, card.id)
+                    put(COLUMN_CARD_DECK_ID, card.deckId)
+                    put(COLUMN_CARD_QUESTION, card.question)
+                    put(COLUMN_CARD_ANSWER, card.answer)
+                }
+                val cardInserted = db.insert(TABLE_FLASHCARDS, null, cardValues) != -1L
+                if (!cardInserted) {
+                    return false
+                }
+            }
+
+            db.setTransactionSuccessful()
+            true
+        } finally {
+            db.endTransaction()
+        }
     }
 
     fun getFlashcardsForDeck(deckId: String): List<Flashcard> {
@@ -283,38 +372,50 @@ class FlashcardDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATA
 
     fun getStudyStatsForDeck(deckId: String): StudyStats {
         val db = readableDatabase
-        
+
         val totalCards = getFlashcardsForDeck(deckId).size
-        
+
         val query = """
             SELECT $COLUMN_PROGRESS_STATUS, COUNT(DISTINCT $COLUMN_PROGRESS_CARD_ID) as count
             FROM $TABLE_STUDY_PROGRESS
             WHERE $COLUMN_PROGRESS_DECK_ID = ?
+            AND $COLUMN_PROGRESS_STATUS IN (?, ?)
             AND $COLUMN_PROGRESS_ID IN (
                 SELECT MAX($COLUMN_PROGRESS_ID)
                 FROM $TABLE_STUDY_PROGRESS
                 WHERE $COLUMN_PROGRESS_DECK_ID = ?
+                AND $COLUMN_PROGRESS_STATUS IN (?, ?)
                 GROUP BY $COLUMN_PROGRESS_CARD_ID
             )
             GROUP BY $COLUMN_PROGRESS_STATUS
         """
-        
-        val cursor = db.rawQuery(query, arrayOf(deckId, deckId))
-        
+
+        val cursor = db.rawQuery(
+            query,
+            arrayOf(
+                deckId,
+                STATUS_GOT_IT,
+                STATUS_STILL_LEARNING,
+                deckId,
+                STATUS_GOT_IT,
+                STATUS_STILL_LEARNING
+            )
+        )
+
         var masteredCount = 0
-        var learningCount = 0
-        
+
         cursor.use {
             while (it.moveToNext()) {
                 val status = it.getString(0)
                 val count = it.getInt(1)
                 when (status) {
-                    "got_it" -> masteredCount = count
-                    "still_learning" -> learningCount = count
+                    STATUS_GOT_IT -> masteredCount = count
                 }
             }
         }
-        
+
+        val learningCount = (totalCards - masteredCount).coerceAtLeast(0)
+
         return StudyStats(
             totalCards = totalCards,
             masteredCards = masteredCount,
@@ -353,6 +454,10 @@ class FlashcardDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATA
         const val COLUMN_PROGRESS_DECK_ID = "deck_id"
         const val COLUMN_PROGRESS_STATUS = "status"
         const val COLUMN_PROGRESS_TIMESTAMP = "timestamp"
+
+        const val STATUS_GOT_IT = "got_it"
+        const val STATUS_STILL_LEARNING = "still_learning"
+        const val STATUS_SESSION_STARTED = "session_started"
     }
 }
 

@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "deck": {
+    "name": "Biology",
+    "subtitle": "Chapter 1",
+    "color": "#118AB2",
+    "icon": "🔬",
+    "isPublic": true
+  },
+  "cards": [
+    {
+      "question": "What is ATP?",
+      "answer": "Cell energy currency"
+    },
+    {
+      "question": "What is DNA?",
+      "answer": "Genetic material"
+    }
+  ]
+}

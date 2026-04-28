@@ -5,16 +5,23 @@ data class Deck(
     val name: String,
     val color: String,
     val cardCount: Int,
-    val subtitle: String = ""
+    val subtitle: String = "",
+    val icon: String = "",
+    val masteryPercent: Int? = null
 ) {
     companion object {
-        fun fromDatabaseDeck(dbDeck: com.example.flashcardstudy.Deck): Deck {
+        fun fromDatabaseDeck(
+            dbDeck: com.example.flashcardstudy.Deck,
+            masteryPercent: Int? = null
+        ): Deck {
             return Deck(
                 id = dbDeck.id,
                 name = dbDeck.name,
                 color = dbDeck.color.ifBlank { "#6C63FF" },
                 cardCount = dbDeck.cardCount,
-                subtitle = dbDeck.subtitle
+                subtitle = dbDeck.subtitle,
+                icon = dbDeck.icon,
+                masteryPercent = masteryPercent
             )
         }
     }

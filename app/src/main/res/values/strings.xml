@@ -1,14 +1,14 @@
 <resources>
-    <string name="app_name">Flashcard Study</string>
+    <string name="app_name">StudyFlow</string>
     <string name="tab_home">Home</string>
-    <string name="tab_new_deck">New Deck</string>
-    <string name="tab_add_card">Add Card</string>
+    <string name="tab_new_deck">Decks</string>
+    <string name="tab_add_card">Add</string>
     <string name="tab_study">Study</string>
     <string name="tab_calendar">Calendar</string>
 
     <!-- Welcome -->
-    <string name="welcome_tagline">Build Decks, Track Your Progress.\nStudy Smarter.</string>
-    <string name="get_started">Get Started</string>
+    <string name="welcome_tagline">Beautiful flashcards with spaced repetition, daily streaks, and AI-assisted card writing.</string>
+    <string name="get_started">Enter</string>
 
     <!-- Calendar -->
     <string name="calendar_study_history">Study History</string>
@@ -32,5 +32,13 @@
     <string name="label_thu">T</string>
     <string name="label_fri">F</string>
     <string name="label_sat">S</string>
+
+    <!-- Study -->
+    <string name="study_question_label">QUESTION</string>
+    <string name="study_answer_label">ANSWER</string>
+    <string name="study_reveal_answer">Tap to reveal answer</string>
+    <string name="study_show_question">Show question</string>
+    <string name="study_empty_title">No cards yet</string>
+    <string name="study_empty_message">Create cards in Add Card to start this session.</string>
 
 </resources>
