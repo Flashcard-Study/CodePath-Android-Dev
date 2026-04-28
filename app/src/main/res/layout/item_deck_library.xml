@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/deckCard"
+    android:id="@+id/libraryCard"
     android:layout_width="match_parent"
     android:layout_height="200dp"
     app:cardCornerRadius="22dp"
     app:cardElevation="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/deckCardLayout"
+        android:id="@+id/libraryCardLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="18dp">
 
-        <!-- Icon container -->
+        <!-- Icon container (top left) -->
         <FrameLayout
-            android:id="@+id/deckIconFrame"
+            android:id="@+id/libraryIconFrame"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:background="@drawable/bg_tag_chip"
@@ -23,7 +23,7 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <ImageView
-                android:id="@+id/deckRibbon"
+                android:id="@+id/libraryIcon"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:layout_gravity="center"
@@ -31,9 +31,9 @@
                 app:tint="@color/white" />
         </FrameLayout>
 
-        <!-- Mastery badge -->
+        <!-- Mastery badge (top right) -->
         <TextView
-            android:id="@+id/deckCardCount"
+            android:id="@+id/libraryMastery"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/bg_tag_chip"
@@ -49,9 +49,9 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Subtitle -->
+        <!-- Course name -->
         <TextView
-            android:id="@+id/deckSubtitle"
+            android:id="@+id/libraryCourse"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-medium"
@@ -60,14 +60,14 @@
             android:textSize="10sp"
             android:alpha="0.75"
             android:textColor="@color/white"
-            app:layout_constraintBottom_toTopOf="@+id/deckName"
+            app:layout_constraintBottom_toTopOf="@+id/libraryDeckName"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             android:layout_marginBottom="4dp" />
 
         <!-- Deck name -->
         <TextView
-            android:id="@+id/deckName"
+            android:id="@+id/libraryDeckName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:fontFamily="serif"
@@ -76,45 +76,36 @@
             android:textColor="@color/white"
             android:textSize="20sp"
             android:textStyle="bold"
-            app:layout_constraintBottom_toTopOf="@+id/deckProgressBar"
+            app:layout_constraintBottom_toTopOf="@+id/progressBar"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             android:layout_marginBottom="12dp" />
 
         <!-- Progress bar -->
         <ProgressBar
-            android:id="@+id/deckProgressBar"
+            android:id="@+id/progressBar"
             style="@android:style/Widget.ProgressBar.Horizontal"
             android:layout_width="0dp"
             android:layout_height="4dp"
             android:max="100"
             android:progressBackgroundTint="#30000000"
             android:progressTint="@color/white"
-            app:layout_constraintBottom_toTopOf="@+id/deckMetaText"
+            app:layout_constraintBottom_toTopOf="@+id/cardCountRow"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             android:layout_marginBottom="8dp" />
 
+        <!-- Card count row -->
         <TextView
-            android:id="@+id/deckMetaText"
+            android:id="@+id/cardCountRow"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:alpha="0.85"
-            android:fontFamily="sans-serif-medium"
             android:textColor="@color/white"
             android:textSize="12sp"
+            android:fontFamily="sans-serif-medium"
+            android:alpha="0.85"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
-
-        <ImageView
-            android:id="@+id/deckPlayIcon"
-            android:layout_width="14dp"
-            android:layout_height="14dp"
-            android:alpha="0.85"
-            android:src="@drawable/ic_nav_study"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:tint="@color/white" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

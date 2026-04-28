@@ -1,21 +1,26 @@
 package com.example.flashcardstudy.ui.newdeck
 
+import android.content.Context
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
-import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.LinearLayout
-import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
+import androidx.core.content.edit
+import androidx.core.graphics.toColorInt
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.example.flashcardstudy.Deck
+import com.example.flashcardstudy.MainActivity
 import com.example.flashcardstudy.R
 import com.example.flashcardstudy.data.gemini.GeminiFlashcardGenerator
+import com.example.flashcardstudy.data.repository.RepositoryProvider
 import com.example.flashcardstudy.util.NetworkUtils
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
@@ -27,142 +32,208 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 
 class NewDeckFragment : Fragment(R.layout.fragment_new_deck) {
+    private val colorAccents = listOf(
+        "#4A7C3A",
+        "#C66B1F",
+        "#B53D2E",
+        "#0E8A5F",
+        "#C84B7C",
+        "#2E5BFF",
+        "#6B4FE8",
+        "#D18A00",
+        "#0F7A8A"
+    )
+    private val icons = listOf("📚", "🧪", "🌍", "📈", "🪶", "🧭", "💻", "🧠", "🎨", "🎵", "✨", "🎯")
 
-    private val colors = listOf("#6C63FF","#FF6B6B","#FFD166","#4CAF50","#118AB2","#EF476F","#F77F00")
-    private val icons = listOf("📚","🔬","🧮","🌍","💡","⚡","🎯","🏆","📝","🧠")
-    private var selectedColor = "#6C63FF"
+    private var selectedColor = "#4A7C3A"
     private var selectedIcon = "📚"
+    private var seedAiEnabled = false
+    private var seedCardCount = 8
+
     private val colorViews = mutableListOf<View>()
     private val iconViews = mutableListOf<MaterialCardView>()
+    private var createButton: MaterialButton? = null
+
+    private val prefs by lazy {
+        requireActivity().getSharedPreferences("new_deck_prefs", Context.MODE_PRIVATE)
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        restorePrefs()
 
-        setupColorPicker(view)
-        setupIconPicker(view)
-
-        val switchPublic = view.findViewById<MaterialSwitch>(R.id.switchPublic)
-        val tvLabel = view.findViewById<TextView>(R.id.tvVisibilityLabel)
-        val tvSub = view.findViewById<TextView>(R.id.tvVisibilitySub)
         val tilDeckName = view.findViewById<TextInputLayout>(R.id.tilDeckName)
         val etDeckName = view.findViewById<TextInputEditText>(R.id.etDeckName)
         val btnCreate = view.findViewById<MaterialButton>(R.id.btnCreateDeck)
-        val btnGenerate = view.findViewById<MaterialButton>(R.id.btnGenerate)
-        val progressBar = view.findViewById<ProgressBar>(R.id.progressBar)
+        val closeButton = view.findViewById<ImageButton>(R.id.newDeckClose)
+        val switchSeedAi = view.findViewById<MaterialSwitch>(R.id.switchSeedAi)
+        val seedCountRow = view.findViewById<LinearLayout>(R.id.seedCountRow)
+        val seedCountMinus = view.findViewById<MaterialButton>(R.id.seedCountMinus)
+        val seedCountPlus = view.findViewById<MaterialButton>(R.id.seedCountPlus)
+        val seedCountValue = view.findViewById<TextView>(R.id.seedCountValue)
+        val seedPromptLayout = view.findViewById<TextInputLayout>(R.id.seedPromptLayout)
+        val seedPromptInput = view.findViewById<TextInputEditText>(R.id.seedPromptInput)
 
-        switchPublic.setOnCheckedChangeListener { _, isChecked ->
-            tvLabel.text = if (isChecked) "Public deck" else "Private deck"
-            tvSub.text = if (isChecked) "Anyone can find this deck" else "Only you can see this deck"
+        createButton = btnCreate
+        setupColorPicker(view)
+        setupIconPicker(view)
+
+        etDeckName.setText(prefs.getString("draft_deck_name", ""))
+        seedPromptInput.setText(prefs.getString("seed_prompt", ""))
+        seedPromptInput.setOnFocusChangeListener { _, _ ->
+            prefs.edit {
+                putString("seed_prompt", seedPromptInput.text?.toString().orEmpty())
+            }
         }
 
-        btnGenerate.setOnClickListener {
-            showGenerateWithAiDialog(etDeckName, btnGenerate, progressBar, view)
+        switchSeedAi.isChecked = seedAiEnabled
+        seedCountRow.visibility = if (seedAiEnabled) View.VISIBLE else View.GONE
+        seedPromptLayout.visibility = if (seedAiEnabled) View.VISIBLE else View.GONE
+        seedCountValue.text = seedCardCount.toString()
+        btnCreate.backgroundTintList = ColorStateList.valueOf(selectedColor.toColorInt())
+
+        closeButton.setOnClickListener {
+            (activity as? MainActivity)?.navigateToHome()
+        }
+
+        switchSeedAi.setOnCheckedChangeListener { _, isChecked ->
+            seedAiEnabled = isChecked
+            seedCountRow.visibility = if (isChecked) View.VISIBLE else View.GONE
+            seedPromptLayout.visibility = if (isChecked) View.VISIBLE else View.GONE
+            prefs.edit { putBoolean("seed_ai", seedAiEnabled) }
+        }
+
+        seedCountMinus.setOnClickListener {
+            seedCardCount = (seedCardCount - 1).coerceAtLeast(1)
+            seedCountValue.text = seedCardCount.toString()
+            prefs.edit { putInt("seed_count", seedCardCount) }
+        }
+
+        seedCountPlus.setOnClickListener {
+            seedCardCount = (seedCardCount + 1).coerceAtMost(25)
+            seedCountValue.text = seedCardCount.toString()
+            prefs.edit { putInt("seed_count", seedCardCount) }
         }
 
         btnCreate.setOnClickListener {
-            val name = etDeckName.text?.toString()?.trim()
-            if (name.isNullOrEmpty()) {
+            val name = etDeckName.text?.toString()?.trim().orEmpty()
+            if (name.isEmpty()) {
                 tilDeckName.error = "Please enter a deck name"
-            } else {
-                tilDeckName.error = null
-                Snackbar.make(view, "\"$name\" deck created!", Snackbar.LENGTH_SHORT).show()
+                return@setOnClickListener
             }
+            tilDeckName.error = null
+            prefs.edit {
+                putString("draft_deck_name", name)
+                putString("seed_prompt", seedPromptInput.text?.toString().orEmpty())
+            }
+            createDeckAndOptionallySeed(
+                deckName = name,
+                seedPrompt = seedPromptInput.text?.toString()?.trim().orEmpty(),
+                createButton = btnCreate
+            )
         }
     }
 
-    private fun showGenerateWithAiDialog(
-        etDeckName: TextInputEditText,
-        btnGenerate: MaterialButton,
-        progressBar: ProgressBar,
-        view: View
+    private fun createDeckAndOptionallySeed(
+        deckName: String,
+        seedPrompt: String,
+        createButton: MaterialButton
     ) {
-        val topicInput = EditText(requireContext()).apply {
-            hint = "e.g. Cellular respiration"
-            minHeight = (48 * resources.displayMetrics.density).toInt()
-        }
-        val countInput = EditText(requireContext()).apply {
-            hint = "Number of cards"
-            setText("5")
-            inputType = android.text.InputType.TYPE_CLASS_NUMBER
-            minHeight = (48 * resources.displayMetrics.density).toInt()
-        }
-        val useDeckContextSwitch = MaterialSwitch(requireContext()).apply {
-            isChecked = false
-        }
-        val useDeckContextLabel = TextView(requireContext()).apply {
-            text = "Use deck context"
-            textSize = 16f
-        }
-        val contextRow = LinearLayout(requireContext()).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
-            addView(useDeckContextLabel, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
-            addView(useDeckContextSwitch)
-        }
-        val dialogContent = LinearLayout(requireContext()).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(48, 24, 48, 0)
-            addView(topicInput)
-            addView(countInput)
-            addView(contextRow)
-        }
+        val deckId = UUID.randomUUID().toString()
+        val deck = Deck(
+            id = deckId,
+            name = deckName,
+            cardCount = 0,
+            color = selectedColor,
+            icon = selectedIcon,
+            isPublic = false
+        )
 
-        AlertDialog.Builder(requireContext())
-            .setTitle("Generate with AI")
-            .setMessage("Generate a deck name and flashcards for a topic.")
-            .setView(dialogContent)
-            .setPositiveButton("Generate") { dialog, _ ->
-                val topic = topicInput.text?.toString()?.trim().orEmpty()
-                val count = countInput.text?.toString()?.trim()?.toIntOrNull() ?: 5
+        createButton.isEnabled = false
+        createButton.text = "Creating..."
 
-                if (topic.isBlank()) {
-                    Toast.makeText(requireContext(), "Enter a topic to generate cards.", Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
-                }
+        lifecycleScope.launch {
+            val createSuccess = RepositoryProvider.flashcardRepository.createDeck(deck)
+            if (!createSuccess) {
+                createButton.isEnabled = true
+                createButton.text = "Create Deck"
+                Snackbar.make(requireView(), "Failed to create deck", Snackbar.LENGTH_SHORT).show()
+                return@launch
+            }
 
+            if (seedAiEnabled) {
                 if (!NetworkUtils.isNetworkAvailable(requireContext())) {
-                    Toast.makeText(requireContext(), "No network connection available.", Toast.LENGTH_SHORT).show()
-                    return@setPositiveButton
-                }
-
-                dialog.dismiss()
-                btnGenerate.isEnabled = false
-                progressBar.visibility = View.VISIBLE
-
-                viewLifecycleOwner.lifecycleScope.launch {
+                    Toast.makeText(
+                        requireContext(),
+                        "\"$deckName\" created. Network unavailable, skipped AI seeding.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                } else {
+                    createButton.text = "Generating starter cards..."
                     try {
-                        val deckId = UUID.randomUUID().toString()
-                        val result = GeminiFlashcardGenerator.generateDeckGeneration(
-                            topic = topic,
+                        val promptTopic = seedPrompt.ifBlank {
+                            deckName.ifBlank { "General review" }
+                        }
+                        val generatedCards = GeminiFlashcardGenerator.generateFlashcards(
+                            topic = promptTopic,
                             deckId = deckId,
-                            count = count.coerceIn(1, 25)
+                            count = seedCardCount.coerceIn(1, 25)
                         )
-                        progressBar.visibility = View.GONE
-                        btnGenerate.isEnabled = true
-                        etDeckName.setText(result.deckName)
-                        Snackbar.make(view, "Generated ${result.flashcards.size} flashcards for \"${result.deckName}\"!", Snackbar.LENGTH_LONG).show()
-                    } catch (e: Exception) {
-                        progressBar.visibility = View.GONE
-                        btnGenerate.isEnabled = true
-                        Snackbar.make(view, e.message ?: "Failed to generate.", Snackbar.LENGTH_LONG).show()
+                        var savedCount = 0
+                        generatedCards.forEach { card ->
+                            if (RepositoryProvider.flashcardRepository.addFlashcard(card)) {
+                                savedCount++
+                            }
+                        }
+                        Toast.makeText(
+                            requireContext(),
+                            "\"$deckName\" created with $savedCount starter cards.",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    } catch (error: Exception) {
+                        Toast.makeText(
+                            requireContext(),
+                            "\"$deckName\" created. AI seeding failed: ${error.message}",
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
                 }
+            } else {
+                Toast.makeText(requireContext(), "\"$deckName\" deck created!", Toast.LENGTH_SHORT)
+                    .show()
             }
-            .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
-            .show()
+
+            createButton.isEnabled = true
+            createButton.text = "Create Deck"
+            prefs.edit { remove("draft_deck_name") }
+            (activity as? MainActivity)?.navigateToHome()
+        }
+    }
+
+    private fun restorePrefs() {
+        selectedColor = prefs.getString("selected_color", "#4A7C3A") ?: "#4A7C3A"
+        if (!colorAccents.contains(selectedColor)) {
+            selectedColor = colorAccents.first()
+        }
+        val storedIcon = prefs.getString("selected_icon", "📚") ?: "📚"
+        selectedIcon = if (icons.contains(storedIcon)) storedIcon else icons.first()
+        seedAiEnabled = prefs.getBoolean("seed_ai", false)
+        seedCardCount = prefs.getInt("seed_count", 8).coerceIn(1, 25)
     }
 
     private fun setupColorPicker(view: View) {
         val container = view.findViewById<LinearLayout>(R.id.colorPickerContainer)
-        val size = (40 * resources.displayMetrics.density).toInt()
+        val size = (44 * resources.displayMetrics.density).toInt()
         val margin = (8 * resources.displayMetrics.density).toInt()
+        container.removeAllViews()
+        colorViews.clear()
 
-        colors.forEachIndexed { index, hex ->
+        colorAccents.forEachIndexed { index, hex ->
             val dot = View(requireContext())
             val params = LinearLayout.LayoutParams(size, size)
             params.marginEnd = margin
             dot.layoutParams = params
-            dot.background = makeCircle(hex, index == 0)
+            dot.background = makeCircle(hex, hex == selectedColor)
             dot.setOnClickListener { selectColor(index) }
             colorViews.add(dot)
             container.addView(dot)
@@ -173,8 +244,10 @@ class NewDeckFragment : Fragment(R.layout.fragment_new_deck) {
         val container = view.findViewById<LinearLayout>(R.id.iconPickerContainer)
         val size = (48 * resources.displayMetrics.density).toInt()
         val margin = (8 * resources.displayMetrics.density).toInt()
+        container.removeAllViews()
+        iconViews.clear()
 
-        icons.forEachIndexed { index, emoji ->
+        icons.forEachIndexed { index, icon ->
             val card = MaterialCardView(requireContext())
             val params = LinearLayout.LayoutParams(size, size)
             params.marginEnd = margin
@@ -182,11 +255,10 @@ class NewDeckFragment : Fragment(R.layout.fragment_new_deck) {
             card.radius = 10 * resources.displayMetrics.density
             card.cardElevation = 0f
             card.strokeWidth = (2 * resources.displayMetrics.density).toInt()
-            card.strokeColor = if (index == 0) Color.parseColor("#6C63FF") else Color.parseColor("#DDDDDD")
-            card.setCardBackgroundColor(if (index == 0) Color.parseColor("#EEF0FF") else Color.parseColor("#F2F2F7"))
+            applyIconSelectionStyle(card, icon == selectedIcon)
 
             val label = TextView(requireContext())
-            label.text = emoji
+            label.text = icon
             label.textSize = 20f
             label.gravity = Gravity.CENTER
             label.layoutParams = LinearLayout.LayoutParams(
@@ -201,26 +273,52 @@ class NewDeckFragment : Fragment(R.layout.fragment_new_deck) {
     }
 
     private fun selectColor(index: Int) {
-        selectedColor = colors[index]
-        colorViews.forEachIndexed { i, v -> v.background = makeCircle(colors[i], i == index) }
+        selectedColor = colorAccents[index]
+        prefs.edit { putString("selected_color", selectedColor) }
+        colorViews.forEachIndexed { i, v -> v.background = makeCircle(colorAccents[i], i == index) }
+        createButton?.backgroundTintList = ColorStateList.valueOf(selectedColor.toColorInt())
+        iconViews.forEachIndexed { i, card ->
+            applyIconSelectionStyle(card, icons[i] == selectedIcon)
+        }
     }
 
     private fun selectIcon(index: Int) {
         selectedIcon = icons[index]
+        prefs.edit { putString("selected_icon", selectedIcon) }
         iconViews.forEachIndexed { i, card ->
-            card.strokeColor = if (i == index) Color.parseColor("#6C63FF") else Color.parseColor("#DDDDDD")
-            card.setCardBackgroundColor(if (i == index) Color.parseColor("#EEF0FF") else Color.parseColor("#F2F2F7"))
+            applyIconSelectionStyle(card, i == index)
         }
     }
 
+    private fun applyIconSelectionStyle(card: MaterialCardView, selected: Boolean) {
+        card.strokeColor = if (selected) selectedColor.toColorInt() else "#DCD4C2".toColorInt()
+        card.setCardBackgroundColor(if (selected) "#EADBF5".toColorInt() else "#FBF7EE".toColorInt())
+    }
+
     private fun makeCircle(hex: String, selected: Boolean): android.graphics.drawable.Drawable {
-        val color = Color.parseColor(hex)
+        val color = hex.toColorInt()
         return if (selected) {
-            val filled = GradientDrawable().apply { shape = GradientDrawable.OVAL; setColor(color) }
-            val ring = GradientDrawable().apply { shape = GradientDrawable.OVAL; setStroke(4, color); setColor(Color.TRANSPARENT) }
-            LayerDrawable(arrayOf(ring, filled)).apply { setLayerInset(1, 6, 6, 6, 6) }
+            val filled = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(color)
+            }
+            val ring = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setStroke(dp(2), "#1A1D24".toColorInt())
+                setColor(Color.TRANSPARENT)
+            }
+            LayerDrawable(arrayOf(ring, filled)).apply {
+                setLayerInset(1, dp(5), dp(5), dp(5), dp(5))
+            }
         } else {
-            GradientDrawable().apply { shape = GradientDrawable.OVAL; setColor(color) }
+            GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(color)
+            }
         }
+    }
+
+    private fun dp(value: Int): Int {
+        return (value * resources.displayMetrics.density).toInt()
     }
 }

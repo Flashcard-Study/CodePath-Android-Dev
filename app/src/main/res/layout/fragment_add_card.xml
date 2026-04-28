@@ -1,42 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/sf_bg"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:paddingBottom="18dp">
 
-        <TextView
-            android:layout_width="wrap_content"
+        <include layout="@layout/view_topbar" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            android:text="Add Card"
-            android:textSize="28sp"
-            android:textStyle="bold" />
+            android:gravity="top"
+            android:orientation="horizontal"
+            android:paddingHorizontal="20dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="serif"
+                    android:text="Create"
+                    android:textColor="@color/sf_ink"
+                    android:textSize="44sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="-6dp"
+                    android:fontFamily="serif"
+                    android:text="new card"
+                    android:textColor="@color/sf_accent"
+                    android:textSize="44sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Card builder - auto-saved"
+                    android:textColor="@color/sf_muted"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <ImageButton
+                android:id="@+id/addCardClose"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:background="@drawable/bg_icon_button"
+                android:padding="8dp"
+                android:src="@android:drawable/ic_menu_close_clear_cancel"
+                android:tint="@color/sf_ink"
+                android:visibility="gone" />
+        </LinearLayout>
 
         <androidx.cardview.widget.CardView
             android:id="@+id/deckBanner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginHorizontal="20dp"
             android:visibility="gone"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="0dp"
-            app:cardBackgroundColor="#F2F2F7"
-            xmlns:app="http://schemas.android.com/apk/res-auto">
+            app:cardBackgroundColor="@color/sf_deck_neu_bg"
+            app:cardCornerRadius="14dp"
+            app:cardElevation="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:paddingStart="14dp"
-                android:paddingEnd="14dp"
-                android:paddingTop="10dp"
-                android:paddingBottom="10dp">
+                android:orientation="horizontal"
+                android:paddingHorizontal="14dp"
+                android:paddingVertical="10dp">
 
                 <View
                     android:id="@+id/deckColorDot"
@@ -45,83 +90,334 @@
                     android:layout_marginEnd="10dp"
                     android:background="@drawable/circle_dot" />
 
-                <TextView
+                <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Adding to:"
-                    android:textSize="12sp"
-                    android:textColor="#888888"
-                    android:layout_marginEnd="4dp" />
+                    android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/tvDeckName"
-                    android:layout_width="wrap_content"
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="monospace"
+                        android:letterSpacing="0.12"
+                        android:text="TARGET DECK"
+                        android:textColor="@color/sf_muted"
+                        android:textSize="10sp" />
+
+                    <TextView
+                        android:id="@+id/tvDeckName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:textColor="@color/sf_ink"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/aiPanel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="14dp"
+            app:cardBackgroundColor="#FFE5D6"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="14dp">
+
+                <LinearLayout
+                    android:id="@+id/aiPanelHeader"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    android:textColor="#1A1A1A" />
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
+                    <TextView
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:background="@drawable/bg_round_10"
+                        android:backgroundTint="@color/sf_ink"
+                        android:gravity="center"
+                        android:text="AI"
+                        android:textColor="@color/white"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Seed with AI"
+                            android:textColor="@color/sf_ink"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="1dp"
+                            android:text="Describe a topic or paste notes"
+                            android:textColor="@color/sf_muted"
+                            android:textSize="11sp" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text=">"
+                        android:textColor="@color/sf_ink"
+                        android:textSize="26sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/aiPanelContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:boxBackgroundColor="#C0FFFFFF"
+                        app:boxCornerRadiusBottomEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusTopStart="12dp"
+                        app:boxStrokeColor="@color/sf_line">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/aiTopicInput"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Describe a topic or paste notes"
+                            android:inputType="textMultiLine"
+                            android:maxLines="3"
+                            android:minLines="2"
+                            android:textColor="@color/sf_ink"
+                            android:textColorHint="@color/sf_muted"
+                            android:textSize="14sp" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Cards to generate"
+                            android:textColor="@color/sf_ink"
+                            android:textSize="12sp" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/generateCountMinus"
+                            android:layout_width="34dp"
+                            android:layout_height="34dp"
+                            android:backgroundTint="@color/sf_ink"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            android:minWidth="0dp"
+                            android:text="-"
+                            android:textAllCaps="false"
+                            android:textColor="@color/white"
+                            app:cornerRadius="17dp" />
+
+                        <TextView
+                            android:id="@+id/generateCountValue"
+                            android:layout_width="38dp"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:text="8"
+                            android:textColor="@color/sf_ink"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/generateCountPlus"
+                            android:layout_width="34dp"
+                            android:layout_height="34dp"
+                            android:backgroundTint="@color/sf_ink"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            android:minWidth="0dp"
+                            android:text="+"
+                            android:textAllCaps="false"
+                            android:textColor="@color/white"
+                            app:cornerRadius="17dp" />
+                    </LinearLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/buttonGenerateAi"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="10dp"
+                        android:backgroundTint="@color/sf_ink"
+                        android:text="Generate 8 cards"
+                        android:textAllCaps="false"
+                        android:textColor="@color/sf_bg"
+                        app:cornerRadius="14dp" />
+
+                    <TextView
+                        android:id="@+id/aiAcceptedCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:fontFamily="monospace"
+                        android:text="AI suggestions - 0/0"
+                        android:textColor="@color/sf_muted"
+                        android:textSize="11sp" />
+
+                    <LinearLayout
+                        android:id="@+id/aiSuggestionsContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:orientation="vertical" />
+                </LinearLayout>
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:text="Front"
-            android:textSize="16sp" />
-
-        <EditText
-            android:id="@+id/editTextFront"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
-            android:hint="Enter front of card"
-            android:minHeight="48dp" />
+            android:layout_marginTop="16dp"
+            android:fontFamily="monospace"
+            android:gravity="center"
+            android:letterSpacing="0.12"
+            android:text="OR WRITE YOUR OWN"
+            android:textColor="@color/sf_muted"
+            android:textSize="10sp" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:text="Back"
-            android:textSize="16sp" />
-
-        <EditText
-            android:id="@+id/editTextBack"
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
-            android:hint="Enter back of card"
-            android:minHeight="48dp" />
+            android:layout_marginTop="10dp"
+            android:layout_marginHorizontal="20dp"
+            app:cardBackgroundColor="@color/sf_surface"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/sf_line"
+            app:strokeWidth="1dp">
 
-        <Button
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:letterSpacing="0.12"
+                    android:text="FRONT - QUESTION"
+                    android:textColor="@color/sf_muted"
+                    android:textSize="10sp" />
+
+                <EditText
+                    android:id="@+id/editTextFront"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:background="@android:color/transparent"
+                    android:gravity="top"
+                    android:hint="What concept or question do you want to remember?"
+                    android:inputType="textMultiLine"
+                    android:minLines="3"
+                    android:textColor="@color/sf_ink"
+                    android:textColorHint="@color/sf_muted"
+                    android:textSize="18sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginHorizontal="20dp"
+            app:cardBackgroundColor="@color/sf_surface"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:strokeColor="@color/sf_line"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="monospace"
+                    android:letterSpacing="0.12"
+                    android:text="BACK - ANSWER"
+                    android:textColor="@color/sf_muted"
+                    android:textSize="10sp" />
+
+                <EditText
+                    android:id="@+id/editTextBack"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:background="@android:color/transparent"
+                    android:gravity="top"
+                    android:hint="The answer, explanation, or memory hook..."
+                    android:inputType="textMultiLine"
+                    android:minLines="4"
+                    android:textColor="@color/sf_ink"
+                    android:textColorHint="@color/sf_muted"
+                    android:textSize="18sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/buttonSave"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            android:text="Save" />
+            android:layout_height="58dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginHorizontal="20dp"
+            android:backgroundTint="@color/sf_accent"
+            android:text="Save card"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            app:cornerRadius="28dp" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/buttonAddAnother"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            android:text="Add Another Card" />
-
-        <Button
-            android:id="@+id/buttonGenerateAi"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            android:text="Generate with AI"
-            android:textColor="#FFFFFF" />
-
-        <Button
-            android:id="@+id/buttonDelete"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Delete" />
-
+            android:layout_height="54dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginHorizontal="20dp"
+            android:backgroundTint="@android:color/transparent"
+            android:text="Save and add another"
+            android:textAllCaps="false"
+            android:textColor="@color/sf_ink"
+            app:cornerRadius="28dp"
+            app:strokeColor="@color/sf_ink"
+            app:strokeWidth="2dp" />
     </LinearLayout>
-</ScrollView>
+</androidx.core.widget.NestedScrollView>

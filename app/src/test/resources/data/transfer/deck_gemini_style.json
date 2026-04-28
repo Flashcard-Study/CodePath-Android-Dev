@@ -2,7 +2,13 @@
   "schemaVersion": 1,
   "deckName": "Gemini Import",
   "flashcards": [
-    { "front": "Term 1", "back": "Definition 1" },
-    { "prompt": "Term 2", "response": "Definition 2" }
+    {
+      "front": "Term 1",
+      "back": "Definition 1"
+    },
+    {
+      "prompt": "Term 2",
+      "response": "Definition 2"
+    }
   ]
 }

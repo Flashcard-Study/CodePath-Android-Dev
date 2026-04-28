@@ -1,24 +1,28 @@
 package com.example.flashcardstudy.ui.addcard
 
+import android.content.Context
 import android.graphics.Color
+import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.cardview.widget.CardView
-import androidx.appcompat.app.AlertDialog
+import androidx.core.content.edit
+import androidx.core.graphics.toColorInt
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.flashcardstudy.Flashcard
+import com.example.flashcardstudy.MainActivity
 import com.example.flashcardstudy.R
 import com.example.flashcardstudy.data.gemini.GeminiFlashcardGenerator
 import com.example.flashcardstudy.data.repository.RepositoryProvider
 import com.example.flashcardstudy.util.NetworkUtils
-import com.google.android.material.materialswitch.MaterialSwitch
+import com.google.android.material.button.MaterialButton
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -27,6 +31,12 @@ class AddCardFragment : Fragment(R.layout.fragment_add_card) {
     private var deckId: String? = null
     private var deckName: String? = null
     private var deckColor: String? = null
+    private val aiSuggestions = mutableListOf<AiSuggestion>()
+    private val acceptedSuggestionIds = mutableSetOf<Int>()
+    private var generateCount = 8
+    private val prefs by lazy {
+        requireActivity().getSharedPreferences("add_card_prefs", Context.MODE_PRIVATE)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,13 +50,23 @@ class AddCardFragment : Fragment(R.layout.fragment_add_card) {
 
         val frontInput = view.findViewById<EditText>(R.id.editTextFront)
         val backInput = view.findViewById<EditText>(R.id.editTextBack)
-        val saveButton = view.findViewById<Button>(R.id.buttonSave)
-        val generateAiButton = view.findViewById<Button>(R.id.buttonGenerateAi)
-        val addAnotherButton = view.findViewById<Button>(R.id.buttonAddAnother)
-        val deleteButton = view.findViewById<Button>(R.id.buttonDelete)
+        val saveButton = view.findViewById<MaterialButton>(R.id.buttonSave)
+        val addAnotherButton = view.findViewById<MaterialButton>(R.id.buttonAddAnother)
+        val closeButton = view.findViewById<ImageButton>(R.id.addCardClose)
         val deckBanner = view.findViewById<CardView>(R.id.deckBanner)
         val tvDeckName = view.findViewById<TextView>(R.id.tvDeckName)
         val colorDot = view.findViewById<View>(R.id.deckColorDot)
+        val aiPanelHeader = view.findViewById<View>(R.id.aiPanelHeader)
+        val aiPanelContent = view.findViewById<LinearLayout>(R.id.aiPanelContent)
+        val aiTopicInput = view.findViewById<EditText>(R.id.aiTopicInput)
+        val generateAiButton = view.findViewById<MaterialButton>(R.id.buttonGenerateAi)
+        val generateCountMinus = view.findViewById<MaterialButton>(R.id.generateCountMinus)
+        val generateCountPlus = view.findViewById<MaterialButton>(R.id.generateCountPlus)
+        val generateCountValue = view.findViewById<TextView>(R.id.generateCountValue)
+        val aiAcceptedCount = view.findViewById<TextView>(R.id.aiAcceptedCount)
+        val aiSuggestionsContainer = view.findViewById<LinearLayout>(R.id.aiSuggestionsContainer)
+        generateCount = prefs.getInt("seed_count", 8).coerceIn(1, 25)
+        aiTopicInput.setText(prefs.getString("seed_prompt", ""))
 
         val currentDeckId = deckId
         val currentDeckName = deckName
@@ -57,19 +77,119 @@ class AddCardFragment : Fragment(R.layout.fragment_add_card) {
             val color = deckColor ?: "#6C63FF"
             val dot = GradientDrawable().apply {
                 shape = GradientDrawable.OVAL
-                setColor(Color.parseColor(color))
+                setColor(color.toColorInt())
             }
             colorDot.background = dot
+        }
+
+        closeButton.setOnClickListener {
+            if (parentFragmentManager.backStackEntryCount > 0) {
+                parentFragmentManager.popBackStack()
+            } else {
+                (activity as? MainActivity)?.navigateToHome()
+            }
+        }
+
+        aiPanelHeader.setOnClickListener {
+            aiPanelContent.visibility =
+                if (aiPanelContent.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+        }
+
+        generateCountMinus.setOnClickListener {
+            generateCount = (generateCount - 1).coerceAtLeast(1)
+            prefs.edit { putInt("seed_count", generateCount) }
+            updateGenerateCountUi(generateAiButton, generateCountValue)
+        }
+
+        generateCountPlus.setOnClickListener {
+            generateCount = (generateCount + 1).coerceAtMost(25)
+            prefs.edit { putInt("seed_count", generateCount) }
+            updateGenerateCountUi(generateAiButton, generateCountValue)
+        }
+        updateGenerateCountUi(generateAiButton, generateCountValue)
+
+        generateAiButton.setOnClickListener {
+            if (currentDeckId == null) {
+                Toast.makeText(
+                    requireContext(),
+                    "No deck selected. Open a deck first.",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@setOnClickListener
+            }
+
+            if (!NetworkUtils.isNetworkAvailable(requireContext())) {
+                Toast.makeText(
+                    requireContext(),
+                    "No network connection available.",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@setOnClickListener
+            }
+
+            val targetDeckId = currentDeckId
+
+            val topic = aiTopicInput.text.toString().trim()
+            prefs.edit { putString("seed_prompt", topic) }
+            val seed = if (topic.isEmpty()) {
+                currentDeckName?.trim().orEmpty().ifBlank { "General review" }
+            } else {
+                topic
+            }
+            generateAiButton.isEnabled = false
+            generateAiButton.text = "Generating..."
+
+            lifecycleScope.launch {
+                try {
+                    val deckContext =
+                        buildDeckContext(targetDeckId, currentDeckName).takeIf { it.isNotBlank() }
+                    val generation = GeminiFlashcardGenerator.generateDeckGeneration(
+                        topic = seed,
+                        deckId = targetDeckId,
+                        count = generateCount.coerceIn(1, 25),
+                        deckContext = deckContext
+                    )
+                    val generatedCards = generation.flashcards
+                    aiSuggestions.clear()
+                    acceptedSuggestionIds.clear()
+                    aiSuggestions.addAll(generatedCards.toSuggestions())
+                    renderSuggestions(aiSuggestionsContainer, aiAcceptedCount, saveButton)
+                    Toast.makeText(
+                        requireContext(),
+                        "Generated ${generatedCards.size} flashcards.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } catch (error: Exception) {
+                    Toast.makeText(
+                        requireContext(),
+                        error.message ?: "Failed to generate with Gemini.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                } finally {
+                    generateAiButton.isEnabled = true
+                    updateGenerateCountUi(generateAiButton, generateCountValue)
+                }
+            }
         }
 
         saveButton.setOnClickListener {
             val front = frontInput.text.toString().trim()
             val back = backInput.text.toString().trim()
+            val accepted = aiSuggestions.filter { acceptedSuggestionIds.contains(it.id) }
+            val entries = mutableListOf<Pair<String, String>>()
 
-            if (front.isEmpty() || back.isEmpty()) {
+            if (front.isNotEmpty() && back.isNotEmpty()) {
+                entries += front to back
+            }
+
+            accepted.forEach { suggestion ->
+                entries += suggestion.question to suggestion.answer
+            }
+
+            if (entries.isEmpty()) {
                 Toast.makeText(
                     requireContext(),
-                    "Enter both sides of the card.",
+                    "Add card content or accept AI suggestions.",
                     Toast.LENGTH_SHORT
                 ).show()
                 return@setOnClickListener
@@ -84,21 +204,31 @@ class AddCardFragment : Fragment(R.layout.fragment_add_card) {
                 return@setOnClickListener
             }
 
-            val flashcard = Flashcard(
-                id = UUID.randomUUID().toString(),
-                deckId = currentDeckId,
-                question = front,
-                answer = back
-            )
+            val targetDeckId = currentDeckId
 
             lifecycleScope.launch {
-                val success = RepositoryProvider.flashcardRepository.addFlashcard(flashcard)
-                if (success) {
+                var savedCount = 0
+                entries.forEach { (question, answer) ->
+                    val flashcard = Flashcard(
+                        id = UUID.randomUUID().toString(),
+                        deckId = targetDeckId,
+                        question = question,
+                        answer = answer
+                    )
+                    if (RepositoryProvider.flashcardRepository.addFlashcard(flashcard)) {
+                        savedCount++
+                    }
+                }
+
+                if (savedCount > 0) {
                     frontInput.text.clear()
                     backInput.text.clear()
+                    aiSuggestions.clear()
+                    acceptedSuggestionIds.clear()
+                    renderSuggestions(aiSuggestionsContainer, aiAcceptedCount, saveButton)
                     Toast.makeText(
                         requireContext(),
-                        "Card saved to \"$currentDeckName\"!",
+                        "$savedCount card(s) saved to \"${currentDeckName ?: "deck"}\".",
                         Toast.LENGTH_SHORT
                     ).show()
                 } else {
@@ -108,150 +238,114 @@ class AddCardFragment : Fragment(R.layout.fragment_add_card) {
             }
         }
 
-        generateAiButton.setOnClickListener {
-            showGenerateWithAiDialog(currentDeckId, currentDeckName, generateAiButton)
-        }
-
         addAnotherButton.setOnClickListener {
             frontInput.text.clear()
             backInput.text.clear()
             frontInput.requestFocus()
         }
 
-        deleteButton.setOnClickListener {
-            frontInput.text.clear()
-            backInput.text.clear()
-            Toast.makeText(requireContext(), "Cleared.", Toast.LENGTH_SHORT).show()
+        updateSaveButtonLabel(saveButton)
+    }
+
+    private fun renderSuggestions(
+        container: LinearLayout,
+        counter: TextView,
+        saveButton: MaterialButton
+    ) {
+        container.removeAllViews()
+        aiSuggestions.forEach { suggestion ->
+            container.addView(buildSuggestionView(suggestion, saveButton, counter))
+        }
+        counter.text = "AI suggestions - ${acceptedSuggestionIds.size}/${aiSuggestions.size}"
+        updateSaveButtonLabel(saveButton)
+    }
+
+    private fun buildSuggestionView(
+        suggestion: AiSuggestion,
+        saveButton: MaterialButton,
+        counter: TextView
+    ): View {
+        val card = CardView(requireContext()).apply {
+            radius = 14f * resources.displayMetrics.density
+            cardElevation = 0f
+            useCompatPadding = false
+            setCardBackgroundColor("#F9F4ED".toColorInt())
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin = (8 * resources.displayMetrics.density).toInt()
+            }
+        }
+
+        val inner = LinearLayout(requireContext()).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(20), dp(16), dp(20), dp(16))
+        }
+        card.addView(inner)
+
+        val questionText = TextView(requireContext()).apply {
+            text = suggestion.question
+            textSize = 15f
+            setTextColor("#1A1D24".toColorInt())
+            setTypeface(typeface, Typeface.BOLD)
+        }
+        val answerText = TextView(requireContext()).apply {
+            text = suggestion.answer
+            textSize = 12f
+            setTextColor("#6E6A5F".toColorInt())
+            setPadding(0, dp(6), 0, 0)
+        }
+
+        inner.addView(questionText)
+        inner.addView(answerText)
+
+        card.setOnClickListener {
+            if (acceptedSuggestionIds.contains(suggestion.id)) {
+                acceptedSuggestionIds.remove(suggestion.id)
+                card.setCardBackgroundColor("#F9F4ED".toColorInt())
+                questionText.setTextColor("#1A1D24".toColorInt())
+                answerText.setTextColor("#6E6A5F".toColorInt())
+            } else {
+                acceptedSuggestionIds.add(suggestion.id)
+                card.setCardBackgroundColor("#1A1D24".toColorInt())
+                questionText.setTextColor(Color.WHITE)
+                answerText.setTextColor("#EADCCF".toColorInt())
+            }
+
+            counter.text = "AI suggestions - ${acceptedSuggestionIds.size}/${aiSuggestions.size}"
+            updateSaveButtonLabel(saveButton)
+        }
+
+        return card
+    }
+
+    private fun updateSaveButtonLabel(saveButton: MaterialButton) {
+        val acceptedCount = acceptedSuggestionIds.size
+        saveButton.text = if (acceptedCount > 0) {
+            "Save card + $acceptedCount from AI"
+        } else {
+            "Save card"
         }
     }
 
-    private fun showGenerateWithAiDialog(
-        deckId: String?,
-        deckName: String?,
-        actionButton: Button
-    ) {
-        if (deckId == null) {
-            Toast.makeText(
-                requireContext(),
-                "No deck selected. Open a deck first.",
-                Toast.LENGTH_SHORT
-            ).show()
-            return
+    private fun updateGenerateCountUi(generateButton: MaterialButton, countView: TextView) {
+        countView.text = generateCount.toString()
+        generateButton.text = "Generate $generateCount cards"
+    }
+
+    private fun dp(value: Int): Int {
+        return (value * resources.displayMetrics.density).toInt()
+    }
+
+    private fun List<Flashcard>.toSuggestions(): List<AiSuggestion> {
+        return mapIndexed { index, card ->
+            AiSuggestion(
+                id = index,
+                question = card.question,
+                answer = card.answer
+            )
         }
-
-        val topicInput = EditText(requireContext()).apply {
-            hint = "e.g. Cellular respiration"
-            minHeight = (48 * resources.displayMetrics.density).toInt()
-        }
-        val countInput = EditText(requireContext()).apply {
-            hint = "Number of cards"
-            setText("5")
-            inputType = android.text.InputType.TYPE_CLASS_NUMBER
-            minHeight = (48 * resources.displayMetrics.density).toInt()
-        }
-        val useDeckContextSwitch = MaterialSwitch(requireContext()).apply {
-            isChecked = true
-        }
-        val useDeckContextLabel = TextView(requireContext()).apply {
-            text = "Use deck context"
-            textSize = 16f
-        }
-        val contextRow = LinearLayout(requireContext()).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = android.view.Gravity.CENTER_VERTICAL
-            addView(useDeckContextLabel, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
-            addView(useDeckContextSwitch)
-        }
-
-        val dialogContent = LinearLayout(requireContext()).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(48, 24, 48, 0)
-            addView(topicInput)
-            addView(countInput)
-            addView(contextRow)
-        }
-
-        AlertDialog.Builder(requireContext())
-            .setTitle("Generate with AI")
-            .setMessage("Generate flashcards for a topic and save them into this deck.")
-            .setView(dialogContent)
-            .setPositiveButton("Generate") { dialog, _ ->
-                val topic = topicInput.text?.toString()?.trim().orEmpty()
-                val count = countInput.text?.toString()?.trim()?.toIntOrNull() ?: 5
-
-                if (topic.isBlank()) {
-                    Toast.makeText(
-                        requireContext(),
-                        "Enter a topic to generate cards.",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    return@setPositiveButton
-                }
-
-                if (!NetworkUtils.isNetworkAvailable(requireContext())) {
-                    Toast.makeText(
-                        requireContext(),
-                        "No network connection available.",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    return@setPositiveButton
-                }
-
-                dialog.dismiss()
-
-                viewLifecycleOwner.lifecycleScope.launch {
-                    actionButton.isEnabled = false
-                    val originalText = actionButton.text
-                    actionButton.text = "Generating..."
-                    try {
-                        val deckContext = if (useDeckContextSwitch.isChecked) {
-                            buildDeckContext(deckId, deckName)
-                        } else {
-                            null
-                        }
-                        val generation = GeminiFlashcardGenerator.generateDeckGeneration(
-                            topic = topic,
-                            deckId = deckId,
-                            count = count.coerceIn(1, 25),
-                            deckContext = deckContext
-                        )
-
-                        var savedCount = 0
-                        generation.flashcards.forEach { card ->
-                            if (RepositoryProvider.flashcardRepository.addFlashcard(card)) {
-                                savedCount++
-                            }
-                        }
-
-                        if (savedCount > 0) {
-                            Toast.makeText(
-                                requireContext(),
-                                "Generated and saved $savedCount cards.",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        } else {
-                            Toast.makeText(
-                                requireContext(),
-                                "Generated cards could not be saved.",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    } catch (error: Exception) {
-                        Toast.makeText(
-                            requireContext(),
-                            error.message ?: "Failed to generate cards.",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    } finally {
-                        actionButton.isEnabled = true
-                        actionButton.text = originalText
-                    }
-                }
-            }
-            .setNegativeButton("Cancel") { dialog, _ ->
-                dialog.dismiss()
-            }
-            .show()
     }
 
     private suspend fun buildDeckContext(deckId: String, deckName: String?): String {
@@ -292,4 +386,10 @@ class AddCardFragment : Fragment(R.layout.fragment_add_card) {
             }
         }
     }
+
+    private data class AiSuggestion(
+        val id: Int,
+        val question: String,
+        val answer: String
+    )
 }

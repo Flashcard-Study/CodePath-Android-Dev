@@ -10,7 +10,6 @@ import org.json.JSONArray
 import org.json.JSONObject
 import retrofit2.Retrofit
 import java.io.IOException
-import java.util.UUID
 
 object GeminiFlashcardGenerator {
     private const val BASE_URL = "https://generativelanguage.googleapis.com/"
@@ -56,9 +55,10 @@ object GeminiFlashcardGenerator {
             )
         }
 
-        val requestBody = buildRequestBody(cleanTopic, cleanCount, deckContext?.trim()).toRequestBody(
-            JSON_MEDIA_TYPE.toMediaType()
-        )
+        val requestBody =
+            buildRequestBody(cleanTopic, cleanCount, deckContext?.trim()).toRequestBody(
+                JSON_MEDIA_TYPE.toMediaType()
+            )
         val response = service.generateContent(MODEL, apiKey, requestBody)
 
         if (!response.isSuccessful) {

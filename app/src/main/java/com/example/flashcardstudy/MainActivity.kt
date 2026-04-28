@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity() {
     private var activeDeckName: String? = null
     private var activeDeckColor: String = "#6C63FF"
     private val newDeckFragment = NewDeckFragment()
-    private val addCardFragment = AddCardFragment() // no-deck fallback for bottom nav
+    private val addCardFragment = AddCardFragment()
     private val studyFragment = StudyFragment()
     private val calendarFragment = CalendarFragment()
 
@@ -35,13 +35,22 @@ class MainActivity : AppCompatActivity() {
 
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+        val root = findViewById<View>(R.id.main)
+        val content = findViewById<View>(R.id.main_frame_layout)
+        bottomNavigationView = findViewById(R.id.bottomNavigationView)
+
+        ViewCompat.setOnApplyWindowInsetsListener(root) { _, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            content.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
+            bottomNavigationView.setPadding(
+                systemBars.left,
+                dpToPx(6),
+                systemBars.right,
+                dpToPx(8) + systemBars.bottom
+            )
             insets
         }
 
-        bottomNavigationView = findViewById(R.id.bottomNavigationView)
         bottomNavigationView.setOnItemSelectedListener { item ->
             if (!suppressNavListener) {
                 val fragment: Fragment = when (item.itemId) {
@@ -119,5 +128,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun replaceFragment(fragment: Fragment) {
         supportFragmentManager.beginTransaction().replace(R.id.main_frame_layout, fragment).commit()
+    }
+
+    private fun dpToPx(dp: Int): Int {
+        return (dp * resources.displayMetrics.density).toInt()
     }
 }

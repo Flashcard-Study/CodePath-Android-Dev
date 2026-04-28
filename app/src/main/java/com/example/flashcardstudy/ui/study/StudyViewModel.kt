@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.flashcardstudy.Flashcard
+import com.example.flashcardstudy.data.database.FlashcardDatabaseHelper
 import com.example.flashcardstudy.data.database.StudyStats
 import com.example.flashcardstudy.data.repository.RepositoryProvider
 import kotlinx.coroutines.launch
@@ -50,6 +51,19 @@ class StudyViewModel : ViewModel() {
         }
     }
 
+    fun recordSession(cardId: String) {
+        viewModelScope.launch {
+            currentDeckId?.let { deckId ->
+                repository.recordStudyProgress(
+                    cardId,
+                    deckId,
+                    FlashcardDatabaseHelper.STATUS_SESSION_STARTED
+                )
+                repository.updateDeckLastStudied(deckId)
+            }
+        }
+    }
+
     private fun loadStats(deckId: String) {
         viewModelScope.launch {
             val stats = repository.getStudyStatsForDeck(deckId)
@@ -62,4 +76,5 @@ class StudyViewModel : ViewModel() {
             _flashcards.postValue(cards.shuffled())
         }
     }
+
 }
